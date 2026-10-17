@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { WhitelistAccessDeniedError, MOCK_WHITELIST_INTERNS } from "@/services/whitelistService";
 import { EmailNotVerifiedError } from "@/services/authService";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -291,9 +291,6 @@ function LoginContent() {
                   Kemnaker Whitelist
                 </span>
               </CardTitle>
-              <CardDescription className="text-xs">
-                Masukkan email magang dan kata sandi Anda. Sistem akan memverifikasi status whitelist pada koleksi <code className="text-slate-800 dark:text-slate-200 font-mono">allowed_interns</code>.
-              </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-5 pt-2">
