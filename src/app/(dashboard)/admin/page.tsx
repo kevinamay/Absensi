@@ -3,20 +3,17 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { attendanceService } from "@/services/attendanceService";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { AttendanceRecord } from "@/types/attendance";
 import {
   Users,
   CheckCircle,
   AlertTriangle,
   Download,
-  Filter,
   Shield,
   Search,
-  Building2,
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -121,10 +118,10 @@ export default function AdminDashboard() {
               Supervisor & HR Portal
             </Badge>
           </div>
-          <h2 className="text-2xl font-black text-white mt-1">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
             Monitoring Presensi Magang CV. Asia Plastik
-          </h2>
-          <p className="text-xs text-slate-400">
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Rekapitulasi kehadiran peserta magang dari MagangHub / SIAPkerja secara real-time.
           </p>
         </div>
@@ -137,51 +134,51 @@ export default function AdminDashboard() {
 
       {/* KPI Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="border-slate-800 bg-slate-900/90 p-5">
+        <Card className="border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Total Kehadiran Hari Ini
             </span>
-            <Users className="w-4 h-4 text-blue-400" />
+            <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white">{records.length}</span>
-            <span className="text-xs text-slate-400 font-medium">peserta tercatat</span>
+            <span className="text-3xl font-black text-slate-900 dark:text-white">{records.length}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">peserta tercatat</span>
           </div>
         </Card>
 
-        <Card className="border-slate-800 bg-slate-900/90 p-5">
+        <Card className="border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Tepat Waktu (On Time)
             </span>
-            <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-emerald-400">{presentCount}</span>
-            <span className="text-xs text-slate-400 font-medium">sebelum 08:15 WIB</span>
+            <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{presentCount}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">sebelum 08:15 WIB</span>
           </div>
         </Card>
 
-        <Card className="border-slate-800 bg-slate-900/90 p-5">
+        <Card className="border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Terlambat
             </span>
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
+            <AlertTriangle className="w-4 h-4 text-amber-500 dark:text-amber-400" />
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-amber-400">{lateCount}</span>
-            <span className="text-xs text-slate-400 font-medium">perlu konfirmasi</span>
+            <span className="text-3xl font-black text-amber-600 dark:text-amber-400">{lateCount}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">perlu konfirmasi</span>
           </div>
         </Card>
       </div>
 
       {/* Filter and Table */}
-      <Card className="border-slate-800 bg-slate-900/90">
-        <CardHeader className="border-b border-slate-800/80 pb-4">
+      <Card className="border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 shadow-sm">
+        <CardHeader className="border-b border-slate-200 dark:border-slate-800/80 pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <CardTitle className="text-base font-bold text-white">
+            <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
               Daftar Log Kehadiran Pabrik
             </CardTitle>
 
@@ -193,18 +190,18 @@ export default function AdminDashboard() {
                   placeholder="Cari nama, kampus, divisi..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl bg-slate-950 border border-slate-800 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
-              <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setFilterType("ALL")}
                   className={`px-2.5 py-1 text-xs rounded-lg font-semibold transition-all ${
                     filterType === "ALL"
-                      ? "bg-slate-800 text-white"
-                      : "text-slate-400 hover:text-slate-200"
+                      ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                   }`}
                 >
                   Semua
@@ -214,8 +211,8 @@ export default function AdminDashboard() {
                   onClick={() => setFilterType("PRESENT")}
                   className={`px-2.5 py-1 text-xs rounded-lg font-semibold transition-all ${
                     filterType === "PRESENT"
-                      ? "bg-emerald-600 text-white"
-                      : "text-slate-400 hover:text-slate-200"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                   }`}
                 >
                   Tepat Waktu
@@ -225,8 +222,8 @@ export default function AdminDashboard() {
                   onClick={() => setFilterType("LATE")}
                   className={`px-2.5 py-1 text-xs rounded-lg font-semibold transition-all ${
                     filterType === "LATE"
-                      ? "bg-amber-600 text-white"
-                      : "text-slate-400 hover:text-slate-200"
+                      ? "bg-amber-600 text-white shadow-xs"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                   }`}
                 >
                   Terlambat
@@ -239,7 +236,7 @@ export default function AdminDashboard() {
         <CardContent className="pt-4 overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
                 <th className="py-3 px-4">Nama Peserta / NIM</th>
                 <th className="py-3 px-4">Institusi / Kampus</th>
                 <th className="py-3 px-4">Divisi Penempatan</th>
@@ -248,38 +245,38 @@ export default function AdminDashboard() {
                 <th className="py-3 px-4">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-500">
+                  <td colSpan={6} className="py-8 text-center text-slate-400 dark:text-slate-500">
                     Tidak ditemukan data presensi yang sesuai.
                   </td>
                 </tr>
               ) : (
                 filtered.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-800/30 transition-colors">
+                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                     <td className="py-3 px-4">
-                      <span className="font-bold text-white block">{item.internName}</span>
-                      <span className="text-[10px] text-slate-400 block">
+                      <span className="font-bold text-slate-900 dark:text-white block">{item.internName}</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
                         NIM: {item.internStudentId || "-"}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-slate-300 font-medium">
+                    <td className="py-3 px-4 text-slate-700 dark:text-slate-300 font-medium">
                       {item.institution || "-"}
                     </td>
-                    <td className="py-3 px-4 text-slate-300">
-                      <span className="inline-block px-2 py-0.5 rounded-md bg-slate-800 font-medium text-[11px]">
+                    <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
+                      <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 font-medium text-[11px] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                         {item.division || "Umum"}
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-mono text-slate-300">
+                    <td className="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">
                       {item.formattedTime} WIB
                     </td>
                     <td className="py-3 px-4">
-                      <span className="text-[11px] text-emerald-400 font-semibold block">
+                      <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold block">
                         {item.distanceFromOfficeMeters}m dari kantor
                       </span>
-                      <span className="text-[10px] text-slate-500 block font-mono">
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-mono">
                         ±{item.location.accuracy ? Math.round(item.location.accuracy) : 0}m GPS
                       </span>
                     </td>

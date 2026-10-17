@@ -15,17 +15,17 @@ const PROTOTYPE_VARIANTS: VariantOption[] = [
   {
     key: "A",
     name: "Corporate Split-Screen",
-    description: "Showcase industri & form terpisah (Modern Enterprise)",
+    description: "Showcase industri & formulir presensi magang terpisah",
   },
   {
     key: "B",
     name: "Digital ID Card / Field Pass",
-    description: "Desain kartu fisik karyawan & QR/NFC mobile-first",
+    description: "Desain kartu fisik peserta magang & QR tap mobile-first",
   },
   {
     key: "C",
     name: "Cyber Command Console",
-    description: "HUD industrial dark glassmorphism & dual-bay console",
+    description: "HUD industrial dengan pemilih divisi & status telemetry",
   },
 ];
 
@@ -43,26 +43,18 @@ function LoginContent() {
     ? variantParam
     : "A";
 
-  const handleLogin = async (
-    identifier: string,
-    pass: string,
-    role: "intern" | "admin"
-  ) => {
+  const handleLogin = async (identifier: string, pass: string) => {
     setErrorMessage(null);
 
     if (!identifier.trim() || !pass.trim()) {
-      setErrorMessage("Mohon masukkan ID / Email dan Kata Sandi Anda.");
+      setErrorMessage("Mohon masukkan ID / NIM dan Kata Sandi Anda.");
       return;
     }
 
     setSubmitting(true);
     try {
       await login(identifier, pass);
-      if (role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push("/intern");
-      }
+      router.push("/intern");
     } catch (err: any) {
       console.warn("Direct Firebase login:", err);
       setErrorMessage(
@@ -73,13 +65,9 @@ function LoginContent() {
     }
   };
 
-  const handleQuickDemo = (role: "intern" | "admin") => {
-    setDemoUser(role);
-    if (role === "admin") {
-      router.push("/admin");
-    } else {
-      router.push("/intern");
-    }
+  const handleQuickDemo = () => {
+    setDemoUser("intern");
+    router.push("/intern");
   };
 
   return (
@@ -122,8 +110,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-400">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-400">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

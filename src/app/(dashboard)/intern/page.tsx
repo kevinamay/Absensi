@@ -14,7 +14,6 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
-  Building,
   GraduationCap,
   Calendar,
   Send,
@@ -143,37 +142,37 @@ export default function InternDashboard() {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="rounded-3xl bg-gradient-to-r from-blue-900/60 via-indigo-900/40 to-slate-900 p-6 sm:p-8 border border-blue-800/40 shadow-xl relative overflow-hidden">
+      <div className="rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 text-white p-6 sm:p-8 shadow-xl relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Badge variant="info" className="gap-1.5 uppercase font-bold text-[10px]">
+              <Badge variant="info" className="gap-1.5 uppercase font-bold text-[10px] bg-white/20 text-white border-white/30">
                 <GraduationCap className="w-3.5 h-3.5" />
                 Peserta Magang CV. Asia Plastik
               </Badge>
               {user?.magangHubId && (
-                <Badge variant="neutral" className="text-[10px]">
+                <Badge variant="neutral" className="text-[10px] bg-white/10 text-white border-white/20">
                   ID: {user.magangHubId}
                 </Badge>
               )}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-white">
+            <h1 className="text-2xl sm:text-3xl font-black">
               Halo, {user?.displayName}
-            </h2>
-            <p className="text-sm text-slate-300">
+            </h1>
+            <p className="text-sm text-blue-100">
               {user?.institution} • Divisi {user?.division || "Operasional Pabrik"}
             </p>
           </div>
 
-          <div className="flex items-center gap-4 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 backdrop-blur-md">
-            <div className="p-3 rounded-xl bg-blue-600/20 text-blue-400">
+          <div className="flex items-center gap-4 bg-black/20 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+            <div className="p-3 rounded-xl bg-white/20 text-white">
               <Clock className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <span className="text-2xl font-mono font-black text-white block">
+              <span className="text-2xl font-mono font-black block">
                 {currentTime || "--:--:--"}
               </span>
-              <span className="text-xs text-slate-400 block font-medium">
+              <span className="text-xs text-blue-200 block font-medium">
                 {currentDate || "Memuat Tanggal..."}
               </span>
             </div>
@@ -185,10 +184,10 @@ export default function InternDashboard() {
       <GeolocationWatcher />
 
       {/* Attendance Action Card */}
-      <Card className="border-slate-800 bg-slate-900/80">
+      <Card className="border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/80 shadow-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Calendar className="w-5 h-5 text-blue-400" />
+            <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             Aksi Presensi Harian
           </CardTitle>
           <CardDescription>
@@ -197,7 +196,7 @@ export default function InternDashboard() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
               Catatan / Agenda Pekerjaan Hari Ini (Opsional)
             </label>
             <textarea
@@ -205,20 +204,20 @@ export default function InternDashboard() {
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Contoh: Menginspeksi hasil cetak mesin injeksi plastik line B, menyusun laporan stok harian..."
               rows={2}
-              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+              className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
             />
           </div>
 
           {successMessage && (
-            <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 text-xs flex items-center gap-2.5">
-              <CheckCircle className="w-5 h-5 shrink-0 text-emerald-400" />
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs flex items-center gap-2.5">
+              <CheckCircle className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
               <span className="font-semibold">{successMessage}</span>
             </div>
           )}
 
           {errorMessage && (
-            <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-center gap-2.5">
-              <AlertTriangle className="w-5 h-5 shrink-0 text-rose-400" />
+            <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2.5">
+              <AlertTriangle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -242,7 +241,7 @@ export default function InternDashboard() {
               disabled={!hasCheckedIn || hasCheckedOut || submitting || !isWithinGeofence}
               isLoading={submitting}
               onClick={() => handleAttendance("CHECK_OUT")}
-              className="w-full border-slate-700"
+              className="w-full"
             >
               <History className="w-4 h-4" />
               {hasCheckedOut
@@ -254,10 +253,10 @@ export default function InternDashboard() {
       </Card>
 
       {/* Today's History Log */}
-      <Card className="border-slate-800 bg-slate-900/80">
+      <Card className="border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/80 shadow-md">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <History className="w-5 h-5 text-indigo-400" />
+            <History className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             Riwayat Presensi Hari Ini
           </CardTitle>
           <CardDescription>
@@ -266,30 +265,30 @@ export default function InternDashboard() {
         </CardHeader>
         <CardContent>
           {records.length === 0 ? (
-            <div className="text-center py-8 border border-dashed border-slate-800 rounded-2xl">
-              <Clock className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-              <p className="text-xs text-slate-400">Belum ada catatan presensi hari ini.</p>
+            <div className="text-center py-8 border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl">
+              <Clock className="w-8 h-8 text-slate-400 dark:text-slate-600 mx-auto mb-2" />
+              <p className="text-xs text-slate-500 dark:text-slate-400">Belum ada catatan presensi hari ini.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {records.map((item) => (
                 <div
                   key={item.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-slate-950/70 border border-slate-800 gap-3"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 gap-3"
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={`p-2.5 rounded-xl ${
                         item.type === "CHECK_IN"
-                          ? "bg-blue-500/10 text-blue-400"
-                          : "bg-indigo-500/10 text-indigo-400"
+                          ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                          : "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
                       }`}
                     >
                       <Clock className="w-4 h-4" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-white">
+                        <span className="font-bold text-sm text-slate-900 dark:text-white">
                           {item.type === "CHECK_IN" ? "Presensi Masuk" : "Presensi Pulang"}
                         </span>
                         <Badge
@@ -299,11 +298,11 @@ export default function InternDashboard() {
                           {item.status === "PRESENT" ? "Tepat Waktu" : "Terlambat"}
                         </Badge>
                       </div>
-                      <span className="text-xs text-slate-400 block mt-0.5">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 block mt-0.5">
                         Waktu: {item.formattedTime} WIB • Jarak GPS: {item.distanceFromOfficeMeters}m
                       </span>
                       {item.notes && (
-                        <p className="text-xs text-slate-300 italic mt-1 bg-slate-900/80 px-2 py-1 rounded-md">
+                        <p className="text-xs text-slate-600 dark:text-slate-300 italic mt-1 bg-white dark:bg-slate-900/80 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-800">
                           "{item.notes}"
                         </p>
                       )}
