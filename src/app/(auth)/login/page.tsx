@@ -14,6 +14,7 @@ import {
   Building2,
   Lock,
   GraduationCap,
+  Sparkles,
   MapPin,
   Clock,
   CheckCircle2,
@@ -23,6 +24,8 @@ import {
   ShieldCheck,
   ExternalLink,
   ChevronRight,
+  ArrowRight,
+  UserPlus,
   Eye,
   EyeOff,
 } from "lucide-react";
@@ -447,16 +450,31 @@ function LoginContent() {
                   Masuk dengan Email (Fallback)
                 </Button>
 
-                <div className="pt-2 text-center">
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Belum mengaktifkan kata sandi akun magang?{" "}
-                    <a
-                      href="/register"
-                      className="font-bold text-blue-600 dark:text-blue-400 hover:underline"
-                    >
-                      Daftar / Aktivasi di sini →
-                    </a>
-                  </p>
+                {/* AESTHETIC CALLOUT: Activation / Registration for New Interns */}
+                <div className="mt-4 p-3.5 rounded-2xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-blue-500/5 dark:from-blue-950/40 dark:via-indigo-950/30 dark:to-slate-900 border border-blue-500/20 dark:border-blue-400/20 flex items-center justify-between gap-3 shadow-sm hover:border-blue-500/40 transition-all group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25 shrink-0 group-hover:scale-105 transition-transform">
+                      <Sparkles className="w-4 h-4 text-amber-300" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        Peserta Magang Baru?
+                        <span className="text-[10px] bg-blue-500/20 text-blue-700 dark:text-blue-300 font-bold px-1.5 py-0.5 rounded-full">
+                          Aktivasi
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+                        Daftarkan kata sandi akun magang Anda
+                      </div>
+                    </div>
+                  </div>
+                  <a
+                    href="/register"
+                    className="shrink-0 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm hover:shadow-md transition-all flex items-center gap-1"
+                  >
+                    <span>Mulai</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
                 </div>
               </form>
             </CardContent>
