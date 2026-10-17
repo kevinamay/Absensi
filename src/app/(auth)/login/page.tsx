@@ -14,7 +14,6 @@ import {
   Building2,
   Lock,
   GraduationCap,
-  Sparkles,
   MapPin,
   Clock,
   CheckCircle2,
@@ -26,8 +25,6 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
-  UserCheck,
-  UserX,
 } from "lucide-react";
 
 function LoginContent() {
@@ -462,79 +459,6 @@ function LoginContent() {
                   </p>
                 </div>
               </form>
-
-              {/* ============================================================== */}
-              {/* EVALUATOR & QA TESTING SUITE: Test Whitelist Enforcement       */}
-              {/* ============================================================== */}
-              <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
-                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-2.5">
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                    Uji Keamanan Whitelist (Evaluasi):
-                  </span>
-                  <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500">
-                    Live Demo
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  {/* Authorized Test Button */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail("ahmad.fauzi@kemnaker.maganghub.id");
-                      setPassword("magang2026");
-                      handleSiapkerjaLogin("ahmad.fauzi@kemnaker.maganghub.id");
-                    }}
-                    className="w-full text-left p-2.5 rounded-xl border border-emerald-300/60 dark:border-emerald-800/60 bg-emerald-50/50 dark:bg-emerald-950/30 hover:bg-emerald-100/60 dark:hover:bg-emerald-900/40 transition-colors flex items-center justify-between group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <UserCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                      <div>
-                        <div className="text-xs font-bold text-emerald-900 dark:text-emerald-200">
-                          Uji Akun Terdaftar (Ahmad Fauzi)
-                        </div>
-                        <div className="text-[10px] text-emerald-700 dark:text-emerald-400">
-                          ahmad.fauzi@kemnaker.maganghub.id • Whitelisted ✓
-                        </div>
-                      </div>
-                    </div>
-                    <Badge variant="success" className="text-[10px]">
-                      Akses Diterima
-                    </Badge>
-                  </button>
-
-                  {/* Unauthorized / Rejected Test Button */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail("budi.unregistered@gmail.com");
-                      setPassword("password123");
-                      handleSiapkerjaLogin("budi.unregistered@gmail.com");
-                    }}
-                    className="w-full text-left p-2.5 rounded-xl border border-rose-300/60 dark:border-rose-800/60 bg-rose-50/50 dark:bg-rose-950/30 hover:bg-rose-100/60 dark:hover:bg-rose-900/40 transition-colors flex items-center justify-between group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <UserX className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
-                      <div>
-                        <div className="text-xs font-bold text-rose-900 dark:text-rose-200">
-                          Uji Akun Tak Terdaftar (Budi Stranger)
-                        </div>
-                        <div className="text-[10px] text-rose-700 dark:text-rose-400">
-                          budi.unregistered@gmail.com • Unregistered ✕
-                        </div>
-                      </div>
-                    </div>
-                    <Badge variant="danger" className="text-[10px]">
-                      Akses Ditolak
-                    </Badge>
-                  </button>
-                </div>
-
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 text-center">
-                  Klik tombol merah di atas untuk memverifikasi munculnya peringatan <strong>Access Denied</strong> secara instan.
-                </p>
-              </div>
             </CardContent>
           </Card>
 
