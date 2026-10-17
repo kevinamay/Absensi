@@ -27,21 +27,6 @@ export default function DashboardLayout({
     }
   }, [user, loading, router]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs font-semibold">Memuat Sistem CV. Asia Plastik...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
       {/* Top Navbar */}
@@ -63,49 +48,62 @@ export default function DashboardLayout({
 
           <div className="flex items-center gap-2 sm:gap-3">
             {/* User identity chip */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60">
-              {user.role === "admin" ? (
-                <Shield className="w-4 h-4 text-amber-500" />
-              ) : (
-                <GraduationCap className="w-4 h-4 text-blue-500" />
-              )}
-              <div className="text-left text-xs">
-                <span className="font-bold block truncate max-w-[120px]">{user.displayName}</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate max-w-[120px]">
-                  {user.institution || user.division || "Divisi Operasional"}
-                </span>
+            {user && (
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60">
+                {user.role === "admin" ? (
+                  <Shield className="w-4 h-4 text-amber-500" />
+                ) : (
+                  <GraduationCap className="w-4 h-4 text-blue-500" />
+                )}
+                <div className="text-left text-xs">
+                  <span className="font-bold block truncate max-w-[120px]">{user.displayName}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate max-w-[120px]">
+                    {user.institution || user.division || "Divisi Operasional"}
+                  </span>
+                </div>
+                <Badge
+                  variant={user.role === "admin" ? "warning" : "info"}
+                  className="text-[10px] ml-1 uppercase"
+                >
+                  {user.role}
+                </Badge>
               </div>
-              <Badge
-                variant={user.role === "admin" ? "warning" : "info"}
-                className="text-[10px] ml-1 uppercase"
-              >
-                {user.role}
-              </Badge>
-            </div>
+            )}
 
             {/* Dark / Light Mode Switcher */}
             <ThemeToggle variant="inline" />
 
             {/* Logout Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                await logout();
-                router.push("/login");
-              }}
-              className="text-xs gap-1.5 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-950 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Keluar</span>
-            </Button>
+            {user && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  await logout();
+                  router.push("/login");
+                }}
+                className="text-xs gap-1.5 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-950 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Keluar</span>
+              </Button>
+            )}
           </div>
         </div>
       </header>
 
       {/* Main Content Viewport */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {children}
+        {loading ? (
+          <div className="min-h-[400px] flex items-center justify-center text-slate-500 dark:text-slate-400">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              <p className="text-xs font-semibold">Memuat Sistem CV. Asia Plastik...</p>
+            </div>
+          </div>
+        ) : (
+          children
+        )}
       </main>
 
       {/* Footer */}
