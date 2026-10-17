@@ -23,7 +23,6 @@ import {
   Mail,
   ShieldCheck,
   ExternalLink,
-  ChevronRight,
   ArrowRight,
   UserPlus,
   Eye,
@@ -33,13 +32,12 @@ import {
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, loginWithSiapkerja } = useAuth();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [isSsoLoading, setIsSsoLoading] = useState(false);
   const [accessDeniedError, setAccessDeniedError] = useState<string | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [timeStr, setTimeStr] = useState("");
@@ -69,52 +67,7 @@ function LoginContent() {
   }, [searchParams]);
 
   /**
-   * PRIMARY LOGIN METHOD: Sign in with SIAPkerja / MagangHub (Kemnaker RI)
-   * Strictly validates against Firestore whitelist (allowed_interns collection).
-   */
-  const handleSiapkerjaLogin = async (overrideEmail?: string) => {
-    setAccessDeniedError(null);
-    setGeneralError(null);
-    setIsSsoLoading(true);
-
-    try {
-      await loginWithSiapkerja(overrideEmail);
-      router.push("/intern");
-    } catch (err: any) {
-      console.warn("SIAPkerja login check result:", err);
-      if (
-        err instanceof WhitelistAccessDeniedError ||
-        err?.name === "WhitelistAccessDeniedError" ||
-        err?.message?.includes("Access Denied")
-      ) {
-        setAccessDeniedError(
-          "Access Denied: Your email is not registered with the MagangHub/SIAPkerja system for CV. Asia Plastik."
-        );
-      } else if (err.code === "auth/popup-blocked") {
-        setGeneralError(
-          "Jendela popup login diblokir oleh peramban browser Anda. Mohon izinkan popup untuk situs ini, atau gunakan formulir Masuk dengan Email di bawah."
-        );
-      } else if (err.code === "auth/popup-closed-by-user") {
-        setGeneralError("Jendela login ditutup sebelum proses verifikasi selesai.");
-      } else if (
-        err.code === "auth/api-key-not-valid" ||
-        err.code === "auth/invalid-api-key" ||
-        err.message?.includes("API key not valid") ||
-        err.message?.includes("requested action is invalid")
-      ) {
-        setGeneralError(
-          "Firebase API Key belum diisi dengan kredensial aktif proyek absensi-49a9e di file .env.local. Silakan salin Web API Key dari Firebase Console atau gunakan tombol pengujian whitelist di bawah."
-        );
-      } else {
-        setGeneralError(err.message || "Gagal melakukan autentikasi SIAPkerja. Silakan coba kembali.");
-      }
-    } finally {
-      setIsSsoLoading(false);
-    }
-  };
-
-  /**
-   * FALLBACK LOGIN METHOD: Email & Password
+   * LOGIN METHOD: Email & Password
    * Strictly validates against Firestore whitelist BEFORE finalizing the session.
    */
   const handleFallbackSubmit = async (e: React.FormEvent) => {
@@ -339,50 +292,12 @@ function LoginContent() {
                 </span>
               </CardTitle>
               <CardDescription className="text-xs">
-                Sistem akan memverifikasi email Anda pada koleksi <code className="text-slate-800 dark:text-slate-200 font-mono">allowed_interns</code> sebelum memberikan izin masuk.
+                Masukkan email magang dan kata sandi Anda. Sistem akan memverifikasi status whitelist pada koleksi <code className="text-slate-800 dark:text-slate-200 font-mono">allowed_interns</code>.
               </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-5 pt-2">
-              {/* ============================================================== */}
-              {/* PRIMARY METHOD: Sign in with SIAPkerja / MagangHub Button       */}
-              {/* ============================================================== */}
-              <div>
-                <Button
-                  type="button"
-                  onClick={() => handleSiapkerjaLogin()}
-                  isLoading={isSsoLoading}
-                  disabled={submitting || isSsoLoading}
-                  className="w-full py-4 text-sm font-bold bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 hover:from-blue-800 hover:to-indigo-800 text-white shadow-lg shadow-blue-600/25 border border-blue-400/30 rounded-xl transition-all flex items-center justify-center gap-2.5"
-                >
-                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0 font-black text-[11px]">
-                    🇮🇩
-                  </div>
-                  <span>Sign in with SIAPkerja / MagangHub</span>
-                  <ChevronRight className="w-4 h-4 ml-auto opacity-70" />
-                </Button>
-                <p className="text-[11px] text-center text-slate-500 dark:text-slate-400 mt-2">
-                  Metode resmi terintegrasi Single Sign-On (SSO) Kemnaker RI.
-                </p>
-              </div>
-
-              {/* ============================================================== */}
-              {/* DIVIDER: Fallback Method                                       */}
-              {/* ============================================================== */}
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200 dark:border-slate-800" />
-                </div>
-                <div className="relative flex justify-center text-[11px] uppercase tracking-wider font-semibold">
-                  <span className="bg-white dark:bg-slate-900 px-3 text-slate-500 dark:text-slate-400">
-                    atau masuk dengan email & kata sandi
-                  </span>
-                </div>
-              </div>
-
-              {/* ============================================================== */}
-              {/* FALLBACK FORM: Email & Password Input Fields                   */}
-              {/* ============================================================== */}
+              {/* Email & Password Authentication Form */}
               <form onSubmit={handleFallbackSubmit} className="space-y-4" suppressHydrationWarning>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
@@ -447,10 +362,10 @@ function LoginContent() {
                   variant="primary"
                   className="w-full py-3 font-bold mt-2"
                   isLoading={submitting}
-                  disabled={submitting || isSsoLoading}
+                  disabled={submitting}
                 >
                   <Lock className="w-4 h-4 mr-2" />
-                  Masuk dengan Email (Fallback)
+                  Masuk ke Portal Presensi
                 </Button>
 
                 {/* AESTHETIC CALLOUT: Activation / Registration for New Interns */}
