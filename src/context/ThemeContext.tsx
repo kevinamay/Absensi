@@ -16,6 +16,27 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
+  const applyTheme = (t: Theme) => {
+    const root = document.documentElement;
+    const body = document.body;
+
+    if (t === "dark") {
+      root.classList.add("dark");
+      root.classList.remove("light");
+      body?.classList.add("dark");
+      body?.classList.remove("light");
+      root.setAttribute("data-theme", "dark");
+      root.style.colorScheme = "dark";
+    } else {
+      root.classList.remove("dark");
+      root.classList.add("light");
+      body?.classList.remove("dark");
+      body?.classList.add("light");
+      root.setAttribute("data-theme", "light");
+      root.style.colorScheme = "light";
+    }
+  };
+
   useEffect(() => {
     // 1. Check local storage
     const savedTheme = localStorage.getItem("cv_asia_theme") as Theme | null;
@@ -32,19 +53,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
-  const applyTheme = (t: Theme) => {
-    const root = document.documentElement;
-    if (t === "dark") {
-      root.classList.add("dark");
-      root.classList.remove("light");
-      root.style.colorScheme = "dark";
-    } else {
-      root.classList.remove("dark");
-      root.classList.add("light");
-      root.style.colorScheme = "light";
-    }
-  };
-
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     localStorage.setItem("cv_asia_theme", newTheme);
@@ -52,7 +60,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
   };
 
   return (

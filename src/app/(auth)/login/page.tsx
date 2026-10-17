@@ -92,7 +92,7 @@ export default function LoginPage() {
               <Building2 className="w-6 h-6" />
             </div>
             <div>
-              <span className="text-xl font-black tracking-tight block">
+              <span className="text-xl font-black tracking-tight block text-slate-900 dark:text-white">
                 CV. ASIA PLASTIK
               </span>
               <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold tracking-wider uppercase">
@@ -106,7 +106,7 @@ export default function LoginPage() {
             Portal Presensi Resmi MagangHub & SIAPkerja
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight mb-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight mb-4 text-slate-900 dark:text-white">
             Presensi Mandiri Siswa & Mahasiswa Magang.
           </h1>
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-lg leading-relaxed mb-8">
@@ -163,13 +163,14 @@ export default function LoginPage() {
               <GraduationCap className="w-3.5 h-3.5" />
               Khusus Peserta Magang
             </Badge>
-            <h2 className="text-2xl font-black tracking-tight">
+            <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
               Masuk ke Portal Peserta
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Gunakan ID MagangHub resmi, NIM Kampus, atau email Anda.
             </p>
           </div>
+
 
           <Card className="border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/80 shadow-2xl backdrop-blur-xl">
             <CardHeader className="pb-2">
