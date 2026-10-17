@@ -383,7 +383,7 @@ function LoginContent() {
               {/* ============================================================== */}
               {/* FALLBACK FORM: Email & Password Input Fields                   */}
               {/* ============================================================== */}
-              <form onSubmit={handleFallbackSubmit} className="space-y-4">
+              <form onSubmit={handleFallbackSubmit} className="space-y-4" suppressHydrationWarning>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                     Email Terdaftar di SIAPkerja / MagangHub
@@ -398,6 +398,7 @@ function LoginContent() {
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="contoh: ahmad.fauzi@kemnaker.maganghub.id"
                       required
+                      suppressHydrationWarning
                       className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                     />
                   </div>
@@ -427,11 +428,13 @@ function LoginContent() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••••••"
                       required
+                      suppressHydrationWarning
                       className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 pl-10 pr-10 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      suppressHydrationWarning
                       className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
