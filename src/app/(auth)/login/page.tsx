@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { WhitelistAccessDeniedError, MOCK_WHITELIST_INTERNS } from "@/services/whitelistService";
+import { EmailNotVerifiedError } from "@/services/authService";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -134,6 +135,11 @@ function LoginContent() {
     } catch (err: any) {
       console.warn("Fallback login verification result:", err);
       if (
+        err instanceof EmailNotVerifiedError ||
+        err?.message?.includes("verify your email address first")
+      ) {
+        setGeneralError("Access Denied: Please verify your email address first.");
+      } else if (
         err instanceof WhitelistAccessDeniedError ||
         err?.name === "WhitelistAccessDeniedError" ||
         err?.message?.includes("Access Denied")
@@ -443,6 +449,18 @@ function LoginContent() {
                   <Lock className="w-4 h-4 mr-2" />
                   Masuk dengan Email (Fallback)
                 </Button>
+
+                <div className="pt-2 text-center">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Belum mengaktifkan kata sandi akun magang?{" "}
+                    <a
+                      href="/register"
+                      className="font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      Daftar / Aktivasi di sini →
+                    </a>
+                  </p>
+                </div>
               </form>
 
               {/* ============================================================== */}

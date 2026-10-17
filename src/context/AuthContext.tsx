@@ -11,6 +11,7 @@ interface AuthContextType {
   firebaseUser: User | null;
   loading: boolean;
   login: (email: string, pass: string) => Promise<void>;
+  register: (email: string, pass: string) => Promise<{ success: boolean; internData: any }>;
   loginWithSiapkerja: (overrideEmail?: string) => Promise<void>;
   logout: () => Promise<void>;
   setDemoUser: (role: UserRole) => void;
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   firebaseUser: null,
   loading: true,
   login: async () => {},
+  register: async () => ({ success: false, internData: null as any }),
   loginWithSiapkerja: async () => {},
   logout: async () => {},
   setDemoUser: () => {},
@@ -210,6 +212,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false);
   };
 
+  /**
+   * Register intern: whitelist check + Firebase Auth creation + send email verification
+   */
+  const register = async (email: string, pass: string) => {
+    setLoading(true);
+    try {
+      return await authService.registerIntern(email, pass);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -217,6 +231,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         firebaseUser,
         loading,
         login,
+        register,
         loginWithSiapkerja,
         logout,
         setDemoUser,
