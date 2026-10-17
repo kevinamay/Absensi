@@ -89,15 +89,20 @@ function LoginContent() {
         setAccessDeniedError(
           "Access Denied: Your email is not registered with the MagangHub/SIAPkerja system for CV. Asia Plastik."
         );
+      } else if (err.code === "auth/popup-blocked") {
+        setGeneralError(
+          "Jendela popup login diblokir oleh peramban browser Anda. Mohon izinkan popup untuk situs ini, atau gunakan formulir Masuk dengan Email di bawah."
+        );
       } else if (err.code === "auth/popup-closed-by-user") {
-        setGeneralError("Jendela login Google/SIAPkerja ditutup sebelum selesai.");
+        setGeneralError("Jendela login ditutup sebelum proses verifikasi selesai.");
       } else if (
         err.code === "auth/api-key-not-valid" ||
         err.code === "auth/invalid-api-key" ||
-        err.message?.includes("API key not valid")
+        err.message?.includes("API key not valid") ||
+        err.message?.includes("requested action is invalid")
       ) {
         setGeneralError(
-          "Firebase API Key belum diisi dengan kredensial live. Silakan gunakan tombol simulasi whitelist di bawah untuk menguji."
+          "Firebase API Key belum diisi dengan kredensial aktif proyek absensi-49a9e di file .env.local. Silakan salin Web API Key dari Firebase Console atau gunakan tombol pengujian whitelist di bawah."
         );
       } else {
         setGeneralError(err.message || "Gagal melakukan autentikasi SIAPkerja. Silakan coba kembali.");
