@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
 
 export interface AllowedIntern {
   id: string;
@@ -129,6 +129,32 @@ export const whitelistService = {
       return true;
     } catch (err) {
       return false;
+    }
+  },
+
+  /**
+   * Seed / Sync allowed interns into Firebase Firestore (project absensi-49a9e)
+   */
+  async seedAllowedInternsToFirestore(): Promise<{ success: boolean; seededCount: number; message: string }> {
+    try {
+      let count = 0;
+      for (const intern of MOCK_WHITELIST_INTERNS) {
+        const docRef = doc(db, WHITELIST_COLLECTION, intern.email.toLowerCase());
+        await setDoc(docRef, intern, { merge: true });
+        count++;
+      }
+      return {
+        success: true,
+        seededCount: count,
+        message: `Berhasil menambahkan ${count} peserta magang ke koleksi 'allowed_interns' di Firestore database absensi-49a9e!`,
+      };
+    } catch (err: any) {
+      console.error("Gagal melakukan seeding ke Firestore:", err);
+      return {
+        success: false,
+        seededCount: 0,
+        message: err.message || "Gagal melakukan seeding ke Firestore.",
+      };
     }
   },
 };
