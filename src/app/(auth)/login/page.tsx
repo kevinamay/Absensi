@@ -56,10 +56,15 @@ function LoginContent() {
     return () => clearInterval(interval);
   }, []);
 
-  // Check if redirected with error from middleware
+  // Check if redirected with error from middleware or from registration
   useEffect(() => {
     if (searchParams.get("error") === "session_required") {
       setGeneralError("Sesi Anda telah berakhir atau belum terautentikasi. Silakan masuk terlebih dahulu.");
+    }
+    if (searchParams.get("registered") === "pending") {
+      setPendingApprovalNotice(
+        "Pendaftaran Anda berhasil! Akun Anda saat ini sedang menunggu persetujuan (ACC) dari HRD CV. Asia Plastik sebelum dapat masuk."
+      );
     }
   }, [searchParams]);
 

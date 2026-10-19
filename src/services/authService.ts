@@ -100,8 +100,8 @@ export const authService = {
   }): Promise<{ success: boolean; email: string }> {
     const normalizedEmail = data.email.trim().toLowerCase();
 
-    // 1. Dispatch 6-digit OTP code to applicant's email FIRST (Realtime & Instant)
-    const res = await fetch("/api/auth/send-otp", {
+    // 1. Register directly into HRD Pending Approval queue (No OTP)
+    const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -113,10 +113,10 @@ export const authService = {
 
     const json = await res.json();
     if (!res.ok || !json.success) {
-      throw new Error(json.error || "Gagal mengirimkan kode OTP ke email.");
+      throw new Error(json.error || "Gagal memproses pendaftaran akun.");
     }
 
-    // 2. Safely create or prepare credentials without blocking OTP delivery
+    // 2. Safely create or prepare credentials for subsequent login once approved
     try {
       await createUserWithEmailAndPassword(auth, normalizedEmail, data.pass);
     } catch (fbAuthErr: any) {
@@ -125,7 +125,7 @@ export const authService = {
         console.warn("Notice during Firebase user creation:", fbAuthErr.message);
       }
     } finally {
-      // Always ensure session is signed out until OTP verified and HRD approved
+      // Always ensure session is signed out until HRD approves
       await signOut(auth).catch(() => {});
     }
 

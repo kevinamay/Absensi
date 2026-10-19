@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   RegistrationWhitelistError,
   mapFirebaseAuthError,
+  authService,
 } from "@/services/authService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ import {
   CheckCircle2,
   User,
   Building2,
+  Clock,
 } from "lucide-react";
 
 function RegisterContent() {
@@ -45,6 +47,12 @@ function RegisterContent() {
   const [loading, setLoading] = useState(false);
   const [whitelistError, setWhitelistError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [isRegisteredSuccess, setIsRegisteredSuccess] = useState(false);
+  const [registeredData, setRegisteredData] = useState<{
+    fullName: string;
+    email: string;
+    institution: string;
+  } | null>(null);
 
   // Dynamic password strength meter calculation
   const getPasswordStrength = () => {
@@ -117,42 +125,22 @@ function RegisterContent() {
       const cleanInst = institution.trim();
 
       /**
-       * Realtime Direct OTP Dispatch:
-       * Dispatches 6-digit OTP code directly to applicant's email via Resend API
+       * Direct Registration (Tanpa OTP):
+       * Mendaftarkan akun langsung ke antrean persetujuan (ACC) HRD CV. Asia Plastik
        */
-      const res = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: cleanEmail,
-          fullName: cleanName,
-          institution: cleanInst,
-        }),
+      await authService.registerInternOpen({
+        email: cleanEmail,
+        pass: password,
+        fullName: cleanName,
+        institution: cleanInst,
       });
 
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || "Gagal mengirimkan kode OTP ke email.");
-      }
-
-      // Save staged data to sessionStorage so verify-otp page can access it seamlessly
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem(
-          "cv_asia_registration_staged",
-          JSON.stringify({
-            email: cleanEmail,
-            fullName: cleanName,
-            institution: cleanInst,
-            password,
-          })
-        );
-      }
-
-      router.push(
-        `/verify-otp?email=${encodeURIComponent(cleanEmail)}&name=${encodeURIComponent(
-          cleanName
-        )}&inst=${encodeURIComponent(cleanInst)}`
-      );
+      setRegisteredData({
+        fullName: cleanName,
+        email: cleanEmail,
+        institution: cleanInst,
+      });
+      setIsRegisteredSuccess(true);
     } catch (err: any) {
       console.warn("Registration attempt failed:", err);
       setValidationError(err.message || mapFirebaseAuthError(err));
@@ -244,65 +232,57 @@ function RegisterContent() {
           </div>
         )}
 
-        {/* Dual Pane Glass Card */}
-        <div className="rounded-3xl border border-white/30 dark:border-white/15 bg-white/85 dark:bg-slate-900/85 p-6 sm:p-8 lg:p-10 shadow-2xl backdrop-blur-3xl ring-1 ring-black/10 dark:ring-white/10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center transition-all duration-300">
-          
-          {/* LEFT PANE: Information & Stepper Guide */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-6 lg:border-r border-slate-300/60 dark:border-white/10 lg:pr-8">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-700 dark:text-cyan-300 text-[11px] font-bold mb-3">
-                <Sparkles className="w-3.5 h-3.5" />
-                Sistem Pendaftaran Terbuka & Onboarding
+        {!isRegisteredSuccess ? (
+          /* Dual Pane Glass Card */
+          <div className="rounded-3xl border border-white/30 dark:border-white/15 bg-white/85 dark:bg-slate-900/85 p-6 sm:p-8 lg:p-10 shadow-2xl backdrop-blur-3xl ring-1 ring-black/10 dark:ring-white/10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center transition-all duration-300">
+            
+            {/* LEFT PANE: Information & Stepper Guide */}
+            <div className="lg:col-span-5 flex flex-col justify-between space-y-6 lg:border-r border-slate-300/60 dark:border-white/10 lg:pr-8">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-700 dark:text-cyan-300 text-[11px] font-bold mb-3">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Sistem Pendaftaran Terbuka & Onboarding
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                  Pendaftaran Akun Presensi
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+                  Daftarkan data diri Anda untuk memulai magang industri. Akun Anda akan ditinjau dan disetujui (ACC) secara langsung oleh HRD CV. Asia Plastik.
+                </p>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                Pendaftaran Akun Presensi
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                Daftarkan data diri Anda untuk memulai magang industri. Akun Anda akan diverifikasi melalui OTP email dan disetujui (ACC) oleh HRD CV. Asia Plastik.
-              </p>
-            </div>
 
-            {/* Stepper Card */}
-            <div className="p-4 rounded-2xl bg-slate-900/5 dark:bg-white/5 border border-slate-900/10 dark:border-white/10 space-y-3.5">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Tahapan Pendaftaran & Aktivasi:
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 animate-pulse">
-                    1
-                  </div>
-                  <div className="text-xs">
-                    <span className="font-bold text-blue-600 dark:text-cyan-300 block">1. Isi Data Diri & Akun (Saat ini)</span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">Nama lengkap, asal sekolah/kampus, email & sandi</span>
-                  </div>
+              {/* Stepper Card */}
+              <div className="p-4 rounded-2xl bg-slate-900/5 dark:bg-white/5 border border-slate-900/10 dark:border-white/10 space-y-3.5">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Tahapan Pendaftaran & Aktivasi:
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs font-bold shrink-0">
-                    2
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 animate-pulse">
+                      1
+                    </div>
+                    <div className="text-xs">
+                      <span className="font-bold text-blue-600 dark:text-cyan-300 block">1. Isi Data Diri & Akun (Saat ini)</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">Nama lengkap, asal sekolah/kampus, email & sandi</span>
+                    </div>
                   </div>
-                  <div className="text-xs">
-                    <span className="font-bold text-slate-800 dark:text-slate-200 block">2. Verifikasi Kode OTP 6-Digit</span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">Kode keamanan dikirim otomatis ke kotak masuk email</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 opacity-70">
-                  <div className="w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs font-bold shrink-0">
-                    3
-                  </div>
-                  <div className="text-xs">
-                    <span className="font-bold text-slate-800 dark:text-slate-200 block">3. Persetujuan (ACC) oleh HRD</span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">HRD meninjau permohonan di dashboard sebelum dapat login</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs font-bold shrink-0">
+                      2
+                    </div>
+                    <div className="text-xs">
+                      <span className="font-bold text-slate-800 dark:text-slate-200 block">2. Persetujuan (ACC) oleh HRD</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">HRD meninjau permohonan di dashboard sebelum dapat login</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-              <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>Verifikasi Keamanan OTP & Persetujuan HRD Terpadu</span>
+              <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span>Pendaftaran Langsung & Persetujuan HRD Terpadu</span>
+              </div>
             </div>
-          </div>
 
           {/* RIGHT PANE: Registration Form */}
           <div className="lg:col-span-7">
@@ -491,6 +471,82 @@ function RegisterContent() {
             </div>
           </div>
         </div>
+        ) : (
+          /* SUCCESS STATE: PENDING APPROVAL HRD */
+          <div className="rounded-3xl border border-white/30 dark:border-white/15 bg-white/90 dark:bg-slate-900/90 p-8 sm:p-12 shadow-2xl backdrop-blur-3xl ring-1 ring-black/10 dark:ring-white/10 text-center max-w-xl mx-auto animate-in fade-in zoom-in-95 duration-300">
+            <div className="w-20 h-20 mx-auto rounded-3xl bg-emerald-500/15 border-2 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 mb-5">
+              <ShieldCheck className="w-11 h-11" />
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-bold mb-4">
+              <Clock className="w-4 h-4 text-amber-500" />
+              Status: Menunggu Persetujuan (ACC) HRD
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+              Pendaftaran Berhasil!
+            </h2>
+
+            <p className="text-sm text-slate-600 dark:text-slate-300 mt-2.5 leading-relaxed max-w-md mx-auto">
+              Permohonan akun magang untuk <strong className="text-slate-900 dark:text-white">{registeredData?.fullName || email}</strong> telah berhasil didaftarkan ke sistem CV. Asia Plastik.
+            </p>
+
+            {/* Informative Guidance Box */}
+            <div className="my-6 p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-white/10 text-left space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                  i
+                </div>
+                <div className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  <strong className="text-slate-900 dark:text-white block font-semibold mb-1">
+                    Tahap Selanjutnya:
+                  </strong>
+                  Data pendaftaran Anda saat ini sudah masuk ke antrean dasbor <strong>HRD CV. Asia Plastik</strong>. Tim HRD akan memverifikasi dan menyetujui (ACC) akun Anda sebelum Anda dapat melakukan presensi.
+                </div>
+              </div>
+
+              <div className="pt-2.5 border-t border-slate-200 dark:border-white/10 flex flex-col gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                <div className="flex justify-between py-0.5">
+                  <span className="text-slate-400">Email Akun:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{registeredData?.email}</span>
+                </div>
+                <div className="flex justify-between py-0.5">
+                  <span className="text-slate-400">Asal Kampus / Sekolah:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{registeredData?.institution}</span>
+                </div>
+                <div className="flex justify-between py-0.5">
+                  <span className="text-slate-400">Status Akun:</span>
+                  <span className="font-bold text-amber-600 dark:text-amber-400">Menunggu ACC HRD</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Button
+                type="button"
+                onClick={() => router.push("/login")}
+                className="w-full py-3.5 font-bold bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white shadow-xl shadow-blue-900/30 rounded-xl"
+              >
+                Ke Halaman Masuk (Login) <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegisteredSuccess(false);
+                  setEmail("");
+                  setFullName("");
+                  setInstitution("");
+                  setPassword("");
+                  setConfirmPassword("");
+                }}
+                className="text-xs text-slate-500 hover:text-blue-600 dark:hover:text-cyan-400 underline pt-1 cursor-pointer block mx-auto"
+              >
+                Daftarkan akun magang lainnya
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Subtitle Footer info */}
         <div className="mt-4 text-center">

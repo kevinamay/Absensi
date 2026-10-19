@@ -32,7 +32,7 @@ function VerifyOtpContent() {
   const [resending, setResending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successInfo, setSuccessInfo] = useState<string | null>(null);
-  const [isApprovedPending, setIsApprovedPending] = useState(false);
+  const [isApprovedPending, setIsApprovedPending] = useState(true);
 
   // Initial countdown 0 so user can immediately click resend if code not received yet
   const [timeLeft, setTimeLeft] = useState(0);
@@ -398,11 +398,11 @@ function VerifyOtpContent() {
               </div>
 
               <h2 className="text-2xl font-black text-slate-900 dark:text-white">
-                Kode OTP Terverifikasi!
+                Pendaftaran Berhasil!
               </h2>
 
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2.5 leading-relaxed">
-                Pendaftaran akun untuk <strong className="text-slate-900 dark:text-white">{fullName || email}</strong> telah berhasil diverifikasi.
+                Pendaftaran akun untuk <strong className="text-slate-900 dark:text-white">{fullName || email}</strong> telah berhasil didaftarkan.
               </p>
 
               {/* Informative Guidance Card */}
