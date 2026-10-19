@@ -155,25 +155,23 @@ function LoginContent() {
       {/* Floating Theme Toggle at Top Right */}
       <ThemeToggle />
 
-      {/* Floating Corporate Identity Header on Top Left */}
-      <div className="absolute top-6 left-6 z-20 flex items-center gap-3">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative h-11 flex items-center px-3 py-1.5 rounded-2xl bg-slate-900/50 border border-white/20 backdrop-blur-md shadow-lg shadow-black/25 hover:bg-slate-900/60 transition-all">
-            <Image
-              src="/images/logo.webp"
-              alt="CV. Asia Plastik Logo"
-              width={271}
-              height={92}
-              priority
-              className="h-8 sm:h-9 w-auto object-contain filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
-            />
-          </div>
-          <div className="hidden sm:block">
-            <span className="text-sm font-black tracking-tight block text-white drop-shadow">
+      {/* Floating Corporate Identity Header on Top Left (Clean Transparent Logo, No Background Box) */}
+      <div className="absolute top-6 left-6 z-20">
+        <Link href="/" className="flex items-center gap-3.5 group">
+          <Image
+            src="/images/logo.webp"
+            alt="CV. Asia Plastik Logo"
+            width={271}
+            height={92}
+            priority
+            className="h-10 sm:h-12 w-auto object-contain filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] group-hover:opacity-90 transition-opacity"
+          />
+          <div className="hidden sm:block border-l border-white/25 pl-3 py-0.5">
+            <span className="text-sm font-black tracking-tight block text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
               CV. ASIA PLASTIK
             </span>
-            <span className="text-[11px] text-blue-300 font-bold tracking-wider uppercase drop-shadow flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[11px] text-blue-300 font-bold tracking-wider uppercase drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-sm shadow-emerald-400/80" />
               Sidoarjo Plant & Headquarter
             </span>
           </div>

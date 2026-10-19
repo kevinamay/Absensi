@@ -34,17 +34,15 @@ export default function DashboardLayout({
       <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-700/60 flex items-center shadow-sm">
-              <Image
-                src="/images/logo.webp"
-                alt="CV. Asia Plastik"
-                width={271}
-                height={92}
-                priority
-                className="h-6 w-auto object-contain"
-              />
-            </div>
-            <div>
+            <Image
+              src="/images/logo.webp"
+              alt="CV. Asia Plastik"
+              width={271}
+              height={92}
+              priority
+              className="h-8 w-auto object-contain dark:invert-0 invert drop-shadow-sm"
+            />
+            <div className="border-l border-slate-300 dark:border-slate-700 pl-3 py-0.5">
               <span className="font-black text-sm tracking-tight block">
                 CV. ASIA PLASTIK
               </span>
