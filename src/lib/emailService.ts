@@ -1,11 +1,18 @@
 import "server-only";
 import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 interface EmailResult {
   success: boolean;
   messageId?: string;
   simulated?: boolean;
   error?: string;
+}
+
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return null;
+  return new Resend(apiKey);
 }
 
 function getTransporter() {
@@ -96,6 +103,30 @@ export const emailService = {
     console.log(`OTP CODE: ${otp}`);
     console.log("=================================================");
 
+    // 1. Try Resend Delivery (if RESEND_API_KEY is configured)
+    const resend = getResendClient();
+    if (resend) {
+      try {
+        const from = process.env.EMAIL_FROM || "CV. Asia Plastik <onboarding@resend.dev>";
+        const { data, error } = await resend.emails.send({
+          from,
+          to: email,
+          subject,
+          html,
+        });
+
+        if (error) {
+          console.error("Resend delivery returned error:", error);
+        } else {
+          console.log("Resend email delivered successfully to", email, "ID:", data?.id);
+          return { success: true, messageId: data?.id };
+        }
+      } catch (resendErr: any) {
+        console.error("Exception during Resend delivery:", resendErr);
+      }
+    }
+
+    // 2. Fallback to SMTP Nodemailer
     if (!transporter) {
       return { success: true, simulated: true };
     }
@@ -110,7 +141,6 @@ export const emailService = {
       return { success: true, messageId: info.messageId };
     } catch (err: any) {
       console.error("Nodemailer failed to dispatch OTP email:", err);
-      // Still return success in development to not block applicants
       return { success: true, simulated: true, error: err?.message };
     }
   },
@@ -192,6 +222,30 @@ export const emailService = {
     console.log(`SUBJECT: ${subject}`);
     console.log("=================================================");
 
+    // 1. Try Resend Delivery (if RESEND_API_KEY is configured)
+    const resend = getResendClient();
+    if (resend) {
+      try {
+        const from = process.env.EMAIL_FROM || "CV. Asia Plastik <onboarding@resend.dev>";
+        const { data, error } = await resend.emails.send({
+          from,
+          to: email,
+          subject,
+          html,
+        });
+
+        if (error) {
+          console.error("Resend delivery returned error:", error);
+        } else {
+          console.log("Resend approval email delivered successfully to", email, "ID:", data?.id);
+          return { success: true, messageId: data?.id };
+        }
+      } catch (resendErr: any) {
+        console.error("Exception during Resend delivery:", resendErr);
+      }
+    }
+
+    // 2. Fallback to SMTP Nodemailer
     if (!transporter) {
       return { success: true, simulated: true };
     }
