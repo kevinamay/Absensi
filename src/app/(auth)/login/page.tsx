@@ -113,7 +113,7 @@ function LoginContent() {
   return (
     <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center p-4 sm:p-8 lg:p-12 transition-colors duration-300">
       {/* ============================================================== */}
-      {/* FULL-SCREEN REAL BUILDING BACKGROUND: BG_CV ASIA.webp          */}
+      {/* FULL-SCREEN REAL BUILDING BACKGROUND: BG_CV ASIA.webp (4K HD)  */}
       {/* ============================================================== */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -121,11 +121,13 @@ function LoginContent() {
           alt="Gedung CV. Asia Plastik Sidoarjo"
           fill
           priority
-          className="object-cover object-center scale-105 filter contrast-[1.08] brightness-95 dark:brightness-75 transition-all duration-300"
+          unoptimized
+          quality={100}
+          className="object-cover object-center filter contrast-[1.03] brightness-100 dark:brightness-85 transition-all duration-300"
         />
-        {/* Adaptive Optical Scrim Overlay */}
-        <div className="absolute inset-0 bg-slate-900/40 dark:bg-slate-950/75 backdrop-blur-[2px] transition-colors duration-300" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent opacity-90" />
+        {/* Crisp Contrast Overlay without Blurring the Background Image */}
+        <div className="absolute inset-0 bg-slate-950/20 dark:bg-slate-950/60 transition-colors duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-slate-950/30" />
       </div>
 
       {/* Floating Theme Toggle at Top Right */}
