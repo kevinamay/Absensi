@@ -23,25 +23,69 @@ import {
 
 const ATTENDANCE_COLLECTION = "attendance";
 
-// Default office coordinates (CV. Asia Plastik factory/office)
-const OFFICE_LAT = parseFloat(process.env.NEXT_PUBLIC_OFFICE_LATITUDE || "-7.424312");
-const OFFICE_LNG = parseFloat(process.env.NEXT_PUBLIC_OFFICE_LONGITUDE || "112.721415");
-const OFFICE_RADIUS_METERS = parseInt(
-  process.env.NEXT_PUBLIC_OFFICE_RADIUS_METERS || "150",
-  10
-);
+export interface OfficeLocationConfig {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  radiusMeters: number;
+  mapsUrl: string;
+}
+
+// Kantor 1: PT. Asia Plastik (https://maps.app.goo.gl/nG8bbunWWTEA6SLGA)
+// Kantor 2: CV. Asia Plastik (https://maps.app.goo.gl/Qz84ix7g7NYtubgR6)
+export const OFFICIAL_OFFICES: OfficeLocationConfig[] = [
+  {
+    id: "kantor-1",
+    name: process.env.NEXT_PUBLIC_OFFICE_1_NAME || "Kantor 1 (PT. Asia Plastik)",
+    latitude: parseFloat(process.env.NEXT_PUBLIC_OFFICE_1_LATITUDE || "-7.3361184"),
+    longitude: parseFloat(process.env.NEXT_PUBLIC_OFFICE_1_LONGITUDE || "112.7611569"),
+    radiusMeters: parseInt(process.env.NEXT_PUBLIC_OFFICE_RADIUS_METERS || "150", 10),
+    mapsUrl: "https://maps.app.goo.gl/nG8bbunWWTEA6SLGA",
+  },
+  {
+    id: "kantor-2",
+    name: process.env.NEXT_PUBLIC_OFFICE_2_NAME || "Kantor 2 (CV. Asia Plastik)",
+    latitude: parseFloat(process.env.NEXT_PUBLIC_OFFICE_2_LATITUDE || "-7.3352907"),
+    longitude: parseFloat(process.env.NEXT_PUBLIC_OFFICE_2_LONGITUDE || "112.7565049"),
+    radiusMeters: parseInt(process.env.NEXT_PUBLIC_OFFICE_RADIUS_METERS || "150", 10),
+    mapsUrl: "https://maps.app.goo.gl/Qz84ix7g7NYtubgR6",
+  },
+];
 
 export const attendanceService = {
   /**
-   * Evaluates geofence parameters for given GPS coordinates
+   * Evaluates geofence parameters for given GPS coordinates across all official company locations.
+   * If an intern is within radius of EITHER Kantor 1 OR Kantor 2, geofence check passes.
    */
   checkGeofence(lat: number, lng: number) {
-    const distanceMeters = calculateDistanceMeters(lat, lng, OFFICE_LAT, OFFICE_LNG);
-    const isWithinGeofence = distanceMeters <= OFFICE_RADIUS_METERS;
+    let minDistance = Infinity;
+    let closestOffice = OFFICIAL_OFFICES[0];
+    let isWithinGeofence = false;
+
+    const evaluatedOffices = OFFICIAL_OFFICES.map((office) => {
+      const distance = calculateDistanceMeters(lat, lng, office.latitude, office.longitude);
+      const within = distance <= office.radiusMeters;
+      if (within) {
+        isWithinGeofence = true;
+      }
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestOffice = office;
+      }
+      return {
+        ...office,
+        distanceMeters: distance,
+        isWithinGeofence: within,
+      };
+    });
+
     return {
-      distanceMeters,
-      allowedRadiusMeters: OFFICE_RADIUS_METERS,
+      distanceMeters: minDistance,
+      allowedRadiusMeters: closestOffice.radiusMeters,
       isWithinGeofence,
+      closestOffice,
+      allOffices: evaluatedOffices,
     };
   },
 
@@ -85,6 +129,8 @@ export const attendanceService = {
       },
       distanceFromOfficeMeters: payload.distanceFromOfficeMeters,
       isWithinGeofence: payload.isWithinGeofence,
+      officeName: payload.officeName || (payload.isWithinGeofence ? "CV. Asia Plastik" : ""),
+      officeId: payload.officeId || "",
       photoUrl: payload.photoUrl || "",
       notes: payload.notes || "",
       createdAt: now.toISOString(),

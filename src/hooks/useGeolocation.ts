@@ -2,13 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { GeoLocationCoordinates } from "@/types/attendance";
-import { attendanceService } from "@/services/attendanceService";
+import { attendanceService, OFFICIAL_OFFICES, OfficeLocationConfig } from "@/services/attendanceService";
 
-interface GeolocationState {
+export interface GeolocationState {
   coordinates: GeoLocationCoordinates | null;
   distanceMeters: number | null;
   allowedRadiusMeters: number;
   isWithinGeofence: boolean;
+  closestOffice: OfficeLocationConfig | null;
+  allOffices: (OfficeLocationConfig & { distanceMeters: number; isWithinGeofence: boolean })[];
   loading: boolean;
   error: string | null;
 }
@@ -19,6 +21,8 @@ export function useGeolocation() {
     distanceMeters: null,
     allowedRadiusMeters: 150,
     isWithinGeofence: false,
+    closestOffice: null,
+    allOffices: [],
     loading: true,
     error: null,
   });
@@ -46,6 +50,8 @@ export function useGeolocation() {
           distanceMeters: geoCheck.distanceMeters,
           allowedRadiusMeters: geoCheck.allowedRadiusMeters,
           isWithinGeofence: geoCheck.isWithinGeofence,
+          closestOffice: geoCheck.closestOffice,
+          allOffices: geoCheck.allOffices,
           loading: false,
           error: null,
         });
@@ -97,6 +103,8 @@ export function useGeolocation() {
           distanceMeters: geoCheck.distanceMeters,
           allowedRadiusMeters: geoCheck.allowedRadiusMeters,
           isWithinGeofence: geoCheck.isWithinGeofence,
+          closestOffice: geoCheck.closestOffice,
+          allOffices: geoCheck.allOffices,
           loading: false,
           error: null,
         });
@@ -128,19 +136,20 @@ export function useGeolocation() {
   }, [getPosition]);
 
   /**
-   * Helper for development/demo: Simulate being right inside CV. Asia Plastik factory
+   * Helper for development/demo: Simulate being right inside Kantor 1 or Kantor 2
    */
-  const simulateOfficeLocation = () => {
-    const factoryLat = parseFloat(process.env.NEXT_PUBLIC_OFFICE_LATITUDE || "-7.424312");
-    const factoryLng = parseFloat(process.env.NEXT_PUBLIC_OFFICE_LONGITUDE || "112.721415");
-    const coords = { latitude: factoryLat, longitude: factoryLng, accuracy: 5 };
-    const geoCheck = attendanceService.checkGeofence(factoryLat, factoryLng);
+  const simulateOfficeLocation = (officeIndex: number = 0) => {
+    const target = OFFICIAL_OFFICES[officeIndex] || OFFICIAL_OFFICES[0];
+    const coords = { latitude: target.latitude, longitude: target.longitude, accuracy: 5 };
+    const geoCheck = attendanceService.checkGeofence(target.latitude, target.longitude);
 
     setState({
       coordinates: coords,
       distanceMeters: geoCheck.distanceMeters,
       allowedRadiusMeters: geoCheck.allowedRadiusMeters,
       isWithinGeofence: geoCheck.isWithinGeofence,
+      closestOffice: geoCheck.closestOffice,
+      allOffices: geoCheck.allOffices,
       loading: false,
       error: null,
     });
@@ -148,6 +157,7 @@ export function useGeolocation() {
 
   return {
     ...state,
+    offices: OFFICIAL_OFFICES,
     refreshLocation: getPosition,
     simulateOfficeLocation,
   };

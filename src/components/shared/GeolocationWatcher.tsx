@@ -12,6 +12,8 @@ export function GeolocationWatcher() {
     distanceMeters,
     allowedRadiusMeters,
     isWithinGeofence,
+    closestOffice,
+    allOffices,
     loading,
     error,
     refreshLocation,
@@ -26,11 +28,14 @@ export function GeolocationWatcher() {
             <MapPin className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+            <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               Validasi Lokasi (Geofencing GPS)
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300">
+                2 Kantor Terdaftar
+              </span>
             </h4>
             <p className="text-xs text-slate-500">
-              Radius Pabrik CV. Asia Plastik: {allowedRadiusMeters} meter
+              Radius Presensi: {allowedRadiusMeters} meter dari Kantor 1 atau Kantor 2
             </p>
           </div>
         </div>
@@ -41,7 +46,7 @@ export function GeolocationWatcher() {
           ) : isWithinGeofence ? (
             <Badge variant="success" className="gap-1.5 py-1">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              Di Dalam Radius Pabrik
+              Di Dalam Radius {closestOffice?.name ? `(${closestOffice.name})` : "Pabrik"}
             </Badge>
           ) : (
             <Badge variant="danger" className="gap-1.5 py-1">
@@ -52,22 +57,74 @@ export function GeolocationWatcher() {
         </div>
       </div>
 
+      {/* Offices list with live distance badges & Google Maps links */}
+      {allOffices && allOffices.length > 0 && (
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {allOffices.map((office) => (
+            <div
+              key={office.id}
+              className={`p-3 rounded-xl border transition-all ${
+                office.isWithinGeofence
+                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-950 dark:text-emerald-200"
+                  : "bg-white dark:bg-slate-800/80 border-slate-200/70 dark:border-slate-700/70 text-slate-800 dark:text-slate-200"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-bold truncate">{office.name}</span>
+                <span
+                  className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                    office.isWithinGeofence
+                      ? "bg-emerald-500 text-white"
+                      : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                  }`}
+                >
+                  {office.distanceMeters >= 1000
+                    ? `${(office.distanceMeters / 1000).toFixed(1)} km`
+                    : `${office.distanceMeters} m`}
+                </span>
+              </div>
+              <div className="mt-1 flex items-center justify-between text-[11px]">
+                <span className="text-slate-500">Maksimal {office.radiusMeters}m</span>
+                <a
+                  href={office.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:underline font-medium inline-flex items-center gap-0.5"
+                >
+                  Buka Maps ↗
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="p-3 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
           <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block uppercase">
-            Jarak ke Pabrik
+            Jarak Terdekat
           </span>
-          <span className="text-lg font-black text-slate-900 dark:text-white">
-            {distanceMeters !== null ? `${distanceMeters} meter` : "Memindai..."}
+          <span className="text-base font-black text-slate-900 dark:text-white">
+            {distanceMeters !== null
+              ? distanceMeters >= 1000
+                ? `${(distanceMeters / 1000).toFixed(1)} km`
+                : `${distanceMeters} meter`
+              : "Memindai..."}
+          </span>
+          <span className="text-[10px] text-slate-500 block truncate mt-0.5">
+            ke {closestOffice?.name || "Kantor Terdekat"}
           </span>
         </div>
 
         <div className="p-3 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
           <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block uppercase">
-            Akurasi GPS
+            Akurasi GPS Perangkat
           </span>
-          <span className="text-lg font-black text-slate-900 dark:text-white">
+          <span className="text-base font-black text-slate-900 dark:text-white">
             {coordinates?.accuracy ? `± ${Math.round(coordinates.accuracy)} meter` : "Memindai..."}
+          </span>
+          <span className="text-[10px] text-slate-500 block truncate mt-0.5">
+            Sensor Satelit / Hardware
           </span>
         </div>
 
@@ -79,6 +136,9 @@ export function GeolocationWatcher() {
             {coordinates
               ? `${coordinates.latitude.toFixed(6)}, ${coordinates.longitude.toFixed(6)}`
               : "Menunggu GPS"}
+          </span>
+          <span className="text-[10px] text-slate-500 block truncate mt-0.5">
+            Latitude, Longitude
           </span>
         </div>
       </div>
@@ -102,16 +162,27 @@ export function GeolocationWatcher() {
           Perbarui Lokasi GPS
         </Button>
 
-        {/* Development testing button: Allows simulating being inside factory without having to travel */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={simulateOfficeLocation}
-          className="text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50"
-        >
-          <Navigation className="w-3.5 h-3.5" />
-          Mode Uji Coba: Simulasikan di Pabrik
-        </Button>
+        {/* Development testing buttons: Allows simulating being inside Kantor 1 or Kantor 2 */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => simulateOfficeLocation(0)}
+            className="text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50"
+          >
+            <Navigation className="w-3.5 h-3.5" />
+            Uji: Kantor 1
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => simulateOfficeLocation(1)}
+            className="text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50"
+          >
+            <Navigation className="w-3.5 h-3.5" />
+            Uji: Kantor 2
+          </Button>
+        </div>
       </div>
     </div>
   );

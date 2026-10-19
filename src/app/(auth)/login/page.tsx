@@ -41,12 +41,13 @@ function LoginContent() {
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [timeStr, setTimeStr] = useState("");
 
-  // Live Geolocation validation for CV. Asia Plastik factory geofence
+  // Live Geolocation validation for CV. Asia Plastik & PT. Asia Plastik factory geofence
   const {
     coordinates,
     distanceMeters,
     allowedRadiusMeters,
     isWithinGeofence,
+    closestOffice,
     loading: geoLoading,
     error: geoError,
     refreshLocation,
@@ -254,7 +255,7 @@ function LoginContent() {
               Masuk ke Presensi
             </h2>
             <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
-              Gedung CV. Asia Plastik • Presensi Mandiri
+              Kantor 1 (PT. Asia Plastik) &amp; Kantor 2 (CV. Asia Plastik)
             </p>
           </div>
 
@@ -273,7 +274,7 @@ function LoginContent() {
                   : geoError
                   ? geoError
                   : coordinates
-                  ? `Jarak ke Pabrik: ${distanceMeters}m | Akurasi GPS: ±${Math.round(coordinates.accuracy || 0)}m | Klik untuk perbarui`
+                  ? `Jarak ke ${closestOffice?.name || "Kantor"}: ${distanceMeters}m (Radius: ${allowedRadiusMeters}m) | Akurasi GPS: ±${Math.round(coordinates.accuracy || 0)}m | Klik untuk perbarui`
                   : "Klik untuk memindai ulang lokasi GPS"
               }
               className="p-2 border-l border-slate-900/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 rounded-r-xl transition-all cursor-pointer group text-center flex flex-col justify-center items-center"

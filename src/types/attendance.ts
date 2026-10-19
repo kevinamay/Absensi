@@ -25,6 +25,8 @@ export interface AttendanceRecord {
   isWithinGeofence: boolean;
   photoUrl?: string; // Captured selfie verification
   notes?: string;
+  officeName?: string;
+  officeId?: string;
   createdAt: string;
 }
 
@@ -33,6 +35,8 @@ export interface CheckInPayload {
   coordinates: GeoLocationCoordinates;
   distanceFromOfficeMeters: number;
   isWithinGeofence: boolean;
+  officeName?: string;
+  officeId?: string;
   photoUrl?: string;
   notes?: string;
 }

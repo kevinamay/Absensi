@@ -25,7 +25,9 @@ export default function InternDashboard() {
   const {
     coordinates,
     distanceMeters,
+    allowedRadiusMeters,
     isWithinGeofence,
+    closestOffice,
     loading: gpsLoading,
     error: gpsError,
   } = useGeolocation();
@@ -71,7 +73,7 @@ export default function InternDashboard() {
 
     if (!isWithinGeofence) {
       setErrorMessage(
-        `Lokasi Anda berada ${distanceMeters}m dari pabrik (di luar radius maksimal). Anda harus berada di area pabrik CV. Asia Plastik untuk presensi.`
+        `Lokasi Anda berada ${distanceMeters}m dari ${closestOffice?.name || "area kantor"} (radius maksimal ${allowedRadiusMeters}m). Anda harus berada di area Kantor 1 (PT. Asia Plastik) atau Kantor 2 (CV. Asia Plastik) untuk melakukan presensi.`
       );
       return;
     }
@@ -93,14 +95,16 @@ export default function InternDashboard() {
           coordinates,
           distanceFromOfficeMeters: distanceMeters || 0,
           isWithinGeofence,
+          officeName: closestOffice?.name || "CV. Asia Plastik",
+          officeId: closestOffice?.id || "kantor-2",
           notes,
         }
       );
 
       setSuccessMessage(
         type === "CHECK_IN"
-          ? "Presensi Masuk Berhasil Terkirim ke Sistem CV. Asia Plastik!"
-          : "Presensi Pulang Berhasil Dicatat. Selamat Beristirahat!"
+          ? `Presensi Masuk Berhasil Terkirim! Terverifikasi di ${closestOffice?.name || "CV. Asia Plastik"}.`
+          : `Presensi Pulang Berhasil Dicatat di ${closestOffice?.name || "CV. Asia Plastik"}. Selamat Beristirahat!`
       );
       setNotes("");
 
