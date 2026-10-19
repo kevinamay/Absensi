@@ -6,7 +6,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { WhitelistAccessDeniedError } from "@/services/whitelistService";
-import { EmailNotVerifiedError } from "@/services/authService";
+import {
+  EmailNotVerifiedError,
+  AccountPendingApprovalError,
+  AccountRejectedError,
+} from "@/services/authService";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +35,7 @@ function LoginContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [accessDeniedError, setAccessDeniedError] = useState<string | null>(null);
+  const [pendingApprovalNotice, setPendingApprovalNotice] = useState<string | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [timeStr, setTimeStr] = useState("");
 
@@ -60,11 +65,12 @@ function LoginContent() {
 
   /**
    * LOGIN METHOD: Email & Password
-   * Strictly validates against Firestore whitelist BEFORE finalizing the session.
+   * Strictly validates against Firestore whitelist & pending approval status.
    */
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAccessDeniedError(null);
+    setPendingApprovalNotice(null);
     setGeneralError(null);
 
     const normalizedEmail = email.trim();
@@ -80,6 +86,22 @@ function LoginContent() {
     } catch (err: any) {
       console.warn("Login verification result:", err);
       if (
+        err instanceof AccountPendingApprovalError ||
+        err?.name === "AccountPendingApprovalError" ||
+        err?.message?.includes("menunggu persetujuan")
+      ) {
+        setPendingApprovalNotice(
+          "Akun Anda telah terdaftar dan sedang menunggu persetujuan (ACC) dari HRD CV. Asia Plastik. Anda belum dapat masuk sampai akun disetujui."
+        );
+      } else if (
+        err instanceof AccountRejectedError ||
+        err?.name === "AccountRejectedError" ||
+        err?.message?.includes("ditolak")
+      ) {
+        setAccessDeniedError(
+          err.message || "Pendaftaran akun Anda ditolak oleh HRD CV. Asia Plastik."
+        );
+      } else if (
         err instanceof EmailNotVerifiedError ||
         err?.message?.includes("verify your email address first")
       ) {
@@ -90,7 +112,7 @@ function LoginContent() {
         err?.message?.includes("Access Denied")
       ) {
         setAccessDeniedError(
-          "Access Denied: Your email is not registered with the MagangHub/SIAPkerja system for CV. Asia Plastik."
+          "Access Denied: Email Anda belum terdaftar atau disetujui dalam sistem CV. Asia Plastik. Silakan daftar akun baru."
         );
       } else if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found") {
         setGeneralError("Kredensial tidak valid. Pastikan email dan kata sandi sudah benar.");
@@ -151,6 +173,29 @@ function LoginContent() {
 
       {/* Centered Floating Frosted Card Container (Permanent Design B) */}
       <div className="relative z-10 w-full max-w-md my-auto">
+        {/* Pending HRD Approval Notice Banner */}
+        {pendingApprovalNotice && (
+          <div
+            role="alert"
+            className="mb-4 p-4 rounded-2xl bg-amber-950/90 border-2 border-amber-500 text-amber-100 shadow-2xl backdrop-blur-xl animate-in fade-in"
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-xl bg-amber-600 text-white shrink-0 shadow-md">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-bold text-sm text-amber-300">Menunggu Persetujuan (ACC) HRD</h4>
+                <p className="text-xs font-semibold leading-relaxed text-amber-100">
+                  {pendingApprovalNotice}
+                </p>
+                <p className="text-[11px] text-amber-300/80 pt-1">
+                  Harap menunggu sampai akun Anda disetujui oleh tim HRD CV. Asia Plastik.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Access denied error */}
         {accessDeniedError && (
           <div
@@ -170,7 +215,7 @@ function LoginContent() {
         )}
 
         {/* Standard error banner */}
-        {generalError && !accessDeniedError && (
+        {generalError && !accessDeniedError && !pendingApprovalNotice && (
           <div className="mb-4 p-3.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-xs flex items-start gap-2.5 backdrop-blur-md">
             <span className="font-bold mt-0.5">⚠️</span>
             <p className="leading-relaxed">{generalError}</p>

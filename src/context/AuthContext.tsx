@@ -11,7 +11,12 @@ interface AuthContextType {
   firebaseUser: User | null;
   loading: boolean;
   login: (email: string, pass: string) => Promise<void>;
-  register: (email: string, pass: string) => Promise<{ success: boolean; internData: any }>;
+  register: (
+    email: string,
+    pass: string,
+    fullName?: string,
+    institution?: string
+  ) => Promise<{ success: boolean; email?: string }>;
   loginWithSiapkerja: (overrideEmail?: string) => Promise<void>;
   logout: () => Promise<void>;
   setDemoUser: (role: UserRole) => void;
@@ -22,7 +27,7 @@ const AuthContext = createContext<AuthContextType>({
   firebaseUser: null,
   loading: true,
   login: async () => {},
-  register: async () => ({ success: false, internData: null as any }),
+  register: async () => ({ success: false, email: "" }),
   loginWithSiapkerja: async () => {},
   logout: async () => {},
   setDemoUser: () => {},
@@ -213,12 +218,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   /**
-   * Register intern: whitelist check + Firebase Auth creation + send email verification
+   * Register intern: Open registration + Firebase Auth user creation + dispatch 6-digit OTP
    */
-  const register = async (email: string, pass: string) => {
+  const register = async (
+    email: string,
+    pass: string,
+    fullName?: string,
+    institution?: string
+  ) => {
     setLoading(true);
     try {
-      return await authService.registerIntern(email, pass);
+      return await authService.registerInternOpen({
+        email,
+        pass,
+        fullName: fullName || "",
+        institution: institution || "",
+      });
     } finally {
       setLoading(false);
     }

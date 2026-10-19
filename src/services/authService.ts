@@ -10,6 +10,7 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { whitelistService, WhitelistAccessDeniedError, AllowedIntern } from "./whitelistService";
+import { approvalService } from "./approvalService";
 import { userService } from "./userService";
 import { UserProfile } from "@/types/auth";
 
@@ -24,6 +25,24 @@ export class EmailNotVerifiedError extends Error {
   constructor(message: string = "Access Denied: Please verify your email address first.") {
     super(message);
     this.name = "EmailNotVerifiedError";
+  }
+}
+
+export class AccountPendingApprovalError extends Error {
+  constructor(
+    message: string = "Akun Anda telah terdaftar dan sedang menunggu persetujuan (ACC) dari HRD CV. Asia Plastik."
+  ) {
+    super(message);
+    this.name = "AccountPendingApprovalError";
+  }
+}
+
+export class AccountRejectedError extends Error {
+  constructor(
+    message: string = "Pendaftaran akun Anda ditolak oleh HRD CV. Asia Plastik. Silakan hubungi bagian HRD untuk informasi lebih lanjut."
+  ) {
+    super(message);
+    this.name = "AccountRejectedError";
   }
 }
 
@@ -67,13 +86,55 @@ export function mapFirebaseAuthError(error: any): string {
 
 export const authService = {
   /**
-   * STEP 2: REGISTRATION FLOW WITH STRICT WHITELIST VALIDATION & EMAIL VERIFICATION
+   * OPEN REGISTRATION FLOW WITH OTP VERIFICATION & HRD APPROVAL
    * 
-   * Step A: Query Firestore collection 'allowed_interns' to check if email exists.
-   * Step B: If not in whitelist, reject immediately with custom error.
-   * Step C: Create user in Firebase Auth using createUserWithEmailAndPassword.
-   * Step D: Trigger sendEmailVerification to newly created user.
-   * Step E: Immediately call signOut(auth) to clear unverified session and prepare for redirection.
+   * 1. Creates Firebase Auth user credentials safely (hashed).
+   * 2. Immediately signs out so unverified session is not active.
+   * 3. Dispatches 6-digit OTP to user's email via /api/auth/send-otp.
+   */
+  async registerInternOpen(data: {
+    email: string;
+    pass: string;
+    fullName: string;
+    institution: string;
+  }): Promise<{ success: boolean; email: string }> {
+    const normalizedEmail = data.email.trim().toLowerCase();
+
+    try {
+      // Create user in Firebase Auth
+      await createUserWithEmailAndPassword(auth, normalizedEmail, data.pass);
+    } catch (fbAuthErr: any) {
+      // If user already exists or in local demo mode, handle gracefully
+      if (fbAuthErr.code !== "auth/email-already-in-use" && !fbAuthErr.message?.includes("API key")) {
+        console.warn("Notice during Firebase user creation:", fbAuthErr.message);
+      }
+    } finally {
+      // Always ensure session is signed out until OTP verified and HRD approved
+      await signOut(auth).catch(() => {});
+    }
+
+    // Dispatch 6-digit OTP code to applicant's email
+    const res = await fetch("/api/auth/send-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: normalizedEmail,
+        fullName: data.fullName,
+        institution: data.institution,
+      }),
+    });
+
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.error || "Gagal mengirimkan kode OTP ke email.");
+    }
+
+    return { success: true, email: normalizedEmail };
+  },
+
+  /**
+   * STEP 2: REGISTRATION FLOW WITH STRICT WHITELIST VALIDATION & EMAIL VERIFICATION
+   * (Maintained for legacy compatibility with MagangHub Kemnaker pre-registered accounts)
    */
   async registerIntern(
     email: string,
@@ -81,7 +142,7 @@ export const authService = {
   ): Promise<{ success: boolean; internData: AllowedIntern }> {
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Step A & Step B: Strict Firestore Whitelist Validation
+    // Check Whitelist
     let internData: AllowedIntern;
     try {
       internData = await whitelistService.verifyInternEmail(normalizedEmail);
@@ -92,10 +153,8 @@ export const authService = {
     }
 
     try {
-      // Step C: Secure Account Creation in Firebase Auth (handles secure hashing & storage)
       const credential = await createUserWithEmailAndPassword(auth, normalizedEmail, pass);
 
-      // Upsert intern profile in Firestore 'users/{uid}'
       await userService.createOrUpdateInternProfile(credential.user.uid, {
         email: internData.email,
         displayName: internData.fullName,
@@ -107,15 +166,11 @@ export const authService = {
         role: "intern",
       });
 
-      // Step D: Send Email Verification link to newly created user
       await sendEmailVerification(credential.user);
-
-      // Step E: Immediately sign out since email is not verified yet
       await signOut(auth);
 
       return { success: true, internData };
     } catch (firebaseAuthError: any) {
-      // Ensure session is cleared if error occurred during creation
       await signOut(auth).catch(() => {});
       throw firebaseAuthError;
     }
@@ -199,18 +254,45 @@ export const authService = {
   async loginWithEmail(email: string, pass: string): Promise<{ user: User | null; internData: AllowedIntern }> {
     const normalizedEmail = email.trim().toLowerCase();
 
-    // 1. Check Whitelist BEFORE finalizing session
-    const internData = await whitelistService.verifyInternEmail(normalizedEmail);
+    // 1. Check HRD Approval Queue Status
+    const regRecord = await approvalService.getRegistration(normalizedEmail);
+    if (regRecord) {
+      if (regRecord.status === "PENDING_APPROVAL" || regRecord.status === "PENDING_OTP") {
+        throw new AccountPendingApprovalError(
+          "Akun Anda telah terdaftar dan sedang menunggu persetujuan (ACC) dari HRD CV. Asia Plastik."
+        );
+      }
+      if (regRecord.status === "REJECTED") {
+        throw new AccountRejectedError(
+          regRecord.rejectionReason
+            ? `Pendaftaran akun Anda ditolak oleh HRD CV. Asia Plastik: ${regRecord.rejectionReason}`
+            : "Pendaftaran akun Anda ditolak oleh HRD CV. Asia Plastik. Silakan hubungi bagian HRD untuk informasi lebih lanjut."
+        );
+      }
+    }
+
+    // 2. Check Whitelist or Approved status
+    let internData: AllowedIntern;
+    if (regRecord && regRecord.status === "APPROVED") {
+      internData = {
+        id: normalizedEmail,
+        email: normalizedEmail,
+        fullName: regRecord.fullName,
+        studentId: "",
+        identityNumber: "",
+        institution: regRecord.institution,
+        division: "Umum",
+        magangHubId: `MH-${normalizedEmail.slice(0, 4)}`,
+        status: "ACTIVE",
+        companyName: "CV. Asia Plastik",
+      };
+    } else {
+      internData = await whitelistService.verifyInternEmail(normalizedEmail);
+    }
 
     try {
       const credential = await signInWithEmailAndPassword(auth, normalizedEmail, pass);
       const user = credential.user;
-
-      // STEP 4 CONSTRAINT: Explicitly check user.emailVerified
-      if (!user.emailVerified) {
-        await signOut(auth);
-        throw new EmailNotVerifiedError("Access Denied: Please verify your email address first.");
-      }
 
       // Update or sync profile
       await userService.createOrUpdateInternProfile(user.uid, {
@@ -226,7 +308,11 @@ export const authService = {
 
       return { user, internData };
     } catch (authError: any) {
-      if (authError instanceof EmailNotVerifiedError) {
+      if (
+        authError instanceof EmailNotVerifiedError ||
+        authError instanceof AccountPendingApprovalError ||
+        authError instanceof AccountRejectedError
+      ) {
         throw authError;
       }
       // If Firebase Auth throws api key error in local test mode:

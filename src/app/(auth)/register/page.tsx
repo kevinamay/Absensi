@@ -26,12 +26,16 @@ import {
   ArrowRight,
   Sparkles,
   CheckCircle2,
+  User,
+  Building2,
 } from "lucide-react";
 
 function RegisterContent() {
   const router = useRouter();
   const { register } = useAuth();
 
+  const [fullName, setFullName] = useState("");
+  const [institution, setInstitution] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -58,6 +62,16 @@ function RegisterContent() {
   const validateForm = (): boolean => {
     setWhitelistError(null);
     setValidationError(null);
+
+    if (!fullName.trim() || fullName.trim().length < 3) {
+      setValidationError("Silakan masukkan nama lengkap Anda (minimal 3 karakter).");
+      return false;
+    }
+
+    if (!institution.trim() || institution.trim().length < 3) {
+      setValidationError("Silakan masukkan asal sekolah / universitas Anda.");
+      return false;
+    }
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail) {
@@ -99,27 +113,40 @@ function RegisterContent() {
 
     try {
       /**
-       * Sequence:
-       * 1. Query Firestore 'allowed_interns'
-       * 2. If rejected -> throws RegistrationWhitelistError
-       * 3. If accepted -> createUserWithEmailAndPassword in Firebase Auth
-       * 4. sendEmailVerification
-       * 5. signOut(auth) and redirect to /verify-email
+       * Open Registration Flow:
+       * 1. Register with fullName, institution, email, password
+       * 2. Backend dispatches 6-digit OTP code to email
+       * 3. Redirects to /verify-otp
        */
-      await register(email.trim().toLowerCase(), password);
-      router.push(`/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`);
+      await register(
+        email.trim().toLowerCase(),
+        password,
+        fullName.trim(),
+        institution.trim()
+      );
+
+      // Save staged data to sessionStorage so verify-otp page can access it seamlessly
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(
+          "cv_asia_registration_staged",
+          JSON.stringify({
+            email: email.trim().toLowerCase(),
+            fullName: fullName.trim(),
+            institution: institution.trim(),
+          })
+        );
+      }
+
+      router.push(
+        `/verify-otp?email=${encodeURIComponent(
+          email.trim().toLowerCase()
+        )}&name=${encodeURIComponent(fullName.trim())}&inst=${encodeURIComponent(
+          institution.trim()
+        )}`
+      );
     } catch (err: any) {
       console.warn("Registration attempt failed:", err);
-
-      if (
-        err instanceof RegistrationWhitelistError ||
-        err?.name === "RegistrationWhitelistError" ||
-        err?.message?.includes("Registration Failed")
-      ) {
-        setWhitelistError("Registration Failed: Your email is not registered in the HRD whitelist.");
-      } else {
-        setValidationError(mapFirebaseAuthError(err));
-      }
+      setValidationError(err.message || mapFirebaseAuthError(err));
     } finally {
       setLoading(false);
     }
@@ -213,47 +240,47 @@ function RegisterContent() {
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-700 dark:text-cyan-300 text-[11px] font-bold mb-3">
                 <Sparkles className="w-3.5 h-3.5" />
-                Program Magang Kemnaker RI
+                Sistem Pendaftaran Terbuka & Onboarding
               </div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                Aktivasi Akun Presensi
+                Pendaftaran Akun Presensi
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                Sistem otomatis memverifikasi kecocokan email Anda dengan data MagangHub / SIAPkerja yang telah disetujui HRD CV. Asia Plastik.
+                Daftarkan data diri Anda untuk memulai magang industri. Akun Anda akan diverifikasi melalui OTP email dan disetujui (ACC) oleh HRD CV. Asia Plastik.
               </p>
             </div>
 
             {/* Stepper Card */}
             <div className="p-4 rounded-2xl bg-slate-900/5 dark:bg-white/5 border border-slate-900/10 dark:border-white/10 space-y-3.5">
               <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Tahapan Aktivasi:
+                Tahapan Pendaftaran & Aktivasi:
               </div>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold shrink-0">
-                    ✓
+                  <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 animate-pulse">
+                    1
                   </div>
                   <div className="text-xs">
-                    <span className="font-bold text-slate-900 dark:text-white block">1. Lolos Seleksi Magang</span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">Terdaftar pada whitelist HRD CV. Asia Plastik</span>
+                    <span className="font-bold text-blue-600 dark:text-cyan-300 block">1. Isi Data Diri & Akun (Saat ini)</span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">Nama lengkap, asal sekolah/kampus, email & sandi</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 animate-pulse">
+                  <div className="w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs font-bold shrink-0">
                     2
                   </div>
                   <div className="text-xs">
-                    <span className="font-bold text-blue-600 dark:text-cyan-300 block">2. Buat Kata Sandi Akun (Saat ini)</span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">Kredensial khusus aplikasi presensi lokal</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block">2. Verifikasi Kode OTP 6-Digit</span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">Kode keamanan dikirim otomatis ke kotak masuk email</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 opacity-60">
+                <div className="flex items-center gap-3 opacity-70">
                   <div className="w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs font-bold shrink-0">
                     3
                   </div>
                   <div className="text-xs">
-                    <span className="font-bold text-slate-800 dark:text-slate-200 block">3. Verifikasi Link Email</span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">Aktivasi melalui tautan di kotak masuk</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block">3. Persetujuan (ACC) oleh HRD</span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">HRD meninjau permohonan di dashboard sebelum dapat login</span>
                   </div>
                 </div>
               </div>
@@ -261,7 +288,7 @@ function RegisterContent() {
 
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>Kredensial Terenkripsi Firebase Auth</span>
+              <span>Verifikasi Keamanan OTP & Persetujuan HRD Terpadu</span>
             </div>
           </div>
 
@@ -270,21 +297,63 @@ function RegisterContent() {
             <div className="mb-5">
               <Badge variant="info" className="gap-1.5 mb-1.5 py-1 px-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800/80 text-blue-700 dark:text-cyan-300 text-xs">
                 <GraduationCap className="w-3.5 h-3.5" />
-                Formulir Aktivasi Mandiri
+                Formulir Pendaftaran Magang
               </Badge>
               <h2 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                Buat Kata Sandi Baru
+                Daftar Akun Baru
               </h2>
               <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                Masukkan email magang Anda dan tentukan kata sandi baru untuk aplikasi presensi.
+                Lengkapi informasi pendaftaran Anda secara tepat untuk diproses oleh HRD.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4" suppressHydrationWarning>
+            <form onSubmit={handleSubmit} className="space-y-3.5" suppressHydrationWarning>
+              {/* Full Name Input */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                  Nama Lengkap Sesuai KTP / KTM
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="contoh: Kevin Christian Amay"
+                    required
+                    suppressHydrationWarning
+                    className="w-full rounded-xl border border-slate-300 dark:border-white/15 bg-white/90 dark:bg-slate-950/70 pl-10 pr-4 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-600 dark:focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Institution Input */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                  Asal Sekolah / Universitas
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <input
+                    type="text"
+                    value={institution}
+                    onChange={(e) => setInstitution(e.target.value)}
+                    placeholder="contoh: Universitas Negeri Surabaya / SMKN 1 Sidoarjo"
+                    required
+                    suppressHydrationWarning
+                    className="w-full rounded-xl border border-slate-300 dark:border-white/15 bg-white/90 dark:bg-slate-950/70 pl-10 pr-4 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-600 dark:focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  />
+                </div>
+              </div>
+
               {/* Email Input */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
-                  Alamat Email Terdaftar di MagangHub / SIAPkerja
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                  Alamat Email Magang (Untuk Menerima OTP)
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -294,17 +363,17 @@ function RegisterContent() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="contoh: ahmad.fauzi@kemnaker.maganghub.id"
+                    placeholder="contoh: kevin.magang@gmail.com"
                     required
                     suppressHydrationWarning
-                    className="w-full rounded-xl border border-slate-300 dark:border-white/15 bg-white/90 dark:bg-slate-950/70 pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-600 dark:focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    className="w-full rounded-xl border border-slate-300 dark:border-white/15 bg-white/90 dark:bg-slate-950/70 pl-10 pr-4 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-600 dark:focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                   />
                 </div>
               </div>
 
               {/* Password Input */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                   Kata Sandi Baru (New Password)
                 </label>
                 <div className="relative">
@@ -319,7 +388,7 @@ function RegisterContent() {
                     required
                     minLength={6}
                     suppressHydrationWarning
-                    className="w-full rounded-xl border border-slate-300 dark:border-white/15 bg-white/90 dark:bg-slate-950/70 pl-10 pr-10 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-600 dark:focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    className="w-full rounded-xl border border-slate-300 dark:border-white/15 bg-white/90 dark:bg-slate-950/70 pl-10 pr-10 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-600 dark:focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                   />
                   <button
                     type="button"
@@ -332,8 +401,8 @@ function RegisterContent() {
                 </div>
                 {/* Strength Meter Bar */}
                 {password && (
-                  <div className="mt-2">
-                    <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="mt-1.5">
+                    <div className="w-full h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                       <div
                         className={`h-full transition-all duration-300 ${
                           strength <= 33
@@ -350,7 +419,7 @@ function RegisterContent() {
 
               {/* Confirm Password Input */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                   Konfirmasi Kata Sandi (Confirm Password)
                 </label>
                 <div className="relative">
@@ -365,7 +434,7 @@ function RegisterContent() {
                     required
                     minLength={6}
                     suppressHydrationWarning
-                    className="w-full rounded-xl border border-slate-300 dark:border-white/15 bg-white/90 dark:bg-slate-950/70 pl-10 pr-10 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-600 dark:focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    className="w-full rounded-xl border border-slate-300 dark:border-white/15 bg-white/90 dark:bg-slate-950/70 pl-10 pr-10 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-600 dark:focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                   />
                   <button
                     type="button"
@@ -379,7 +448,7 @@ function RegisterContent() {
               </div>
 
               {/* CRUCIAL UI SECURITY WARNING REQUIREMENT */}
-              <div className="p-3.5 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs flex items-start gap-2.5">
+              <div className="p-3 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-[11px] flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <p className="font-semibold leading-relaxed">
                   For your security, please create a new password for this application. DO NOT use your MagangHub/SIAPkerja password.
@@ -389,11 +458,11 @@ function RegisterContent() {
               <Button
                 type="submit"
                 variant="primary"
-                className="w-full py-3.5 font-bold mt-2 bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white shadow-xl shadow-blue-900/30 border border-blue-400/30 rounded-xl"
+                className="w-full py-3 font-bold mt-2 bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white shadow-xl shadow-blue-900/30 border border-blue-400/30 rounded-xl"
                 isLoading={loading}
               >
                 <UserPlus className="w-4 h-4 mr-2" />
-                Daftarkan Akun & Kirim Verifikasi
+                Daftar & Terima Kode OTP
               </Button>
             </form>
 
