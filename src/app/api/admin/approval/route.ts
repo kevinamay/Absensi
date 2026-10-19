@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { approvalService } from "@/services/approvalService";
+import { emailService } from "@/lib/emailService";
 
 export async function GET() {
   try {
@@ -31,6 +32,12 @@ export async function POST(request: Request) {
         id,
         approvedBy || "HR Supervisor CV. Asia Plastik"
       );
+
+      // Send approval confirmation email on server
+      emailService
+        .sendApprovalEmail(updated.email, updated.fullName, "APPROVED")
+        .catch((e) => console.warn("Failed to dispatch approval email:", e));
+
       return NextResponse.json({
         success: true,
         data: updated,
@@ -41,6 +48,12 @@ export async function POST(request: Request) {
         id,
         reason || "Pendaftaran tidak memenuhi kualifikasi kuota magang."
       );
+
+      // Send rejection notification email on server
+      emailService
+        .sendApprovalEmail(updated.email, updated.fullName, "REJECTED", reason)
+        .catch((e) => console.warn("Failed to dispatch rejection email:", e));
+
       return NextResponse.json({
         success: true,
         data: updated,

@@ -11,7 +11,6 @@ import {
 } from "firebase/firestore";
 import { PendingRegistration, RegistrationStatus } from "@/types/approval";
 import { AllowedIntern } from "./whitelistService";
-import { emailService } from "@/lib/emailService";
 
 const REGISTRATIONS_COLLECTION = "pending_registrations";
 const WHITELIST_COLLECTION = "allowed_interns";
@@ -208,11 +207,6 @@ export const approvalService = {
       console.warn("Error upserting allowed_interns:", err);
     }
 
-    // 3. Send approval confirmation email (runs asynchronously)
-    emailService
-      .sendApprovalEmail(record.email, record.fullName, "APPROVED")
-      .catch((e) => console.warn("Failed to dispatch approval email:", e));
-
     return record;
   },
 
@@ -242,11 +236,6 @@ export const approvalService = {
     } catch (err) {
       console.warn("Error updating rejection in Firestore:", err);
     }
-
-    // Send rejection notification email
-    emailService
-      .sendApprovalEmail(record.email, record.fullName, "REJECTED", reason)
-      .catch((e) => console.warn("Failed to dispatch rejection email:", e));
 
     return record;
   },
