@@ -9,20 +9,33 @@ interface EmailResult {
 }
 
 function getTransporter() {
-  const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
-  const port = Number(process.env.SMTP_PORT || 587);
+  const host = process.env.SMTP_HOST || "smtp.gmail.com";
+  const port = Number(process.env.SMTP_PORT || 465);
 
-  if (!host || !user || !pass) {
+  if (!user || !pass) {
     return null;
+  }
+
+  const cleanPass = pass.replace(/\s+/g, "");
+
+  // Optimized for Gmail SMTP
+  if (host.includes("gmail") || user.endsWith("@gmail.com")) {
+    return nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user,
+        pass: cleanPass,
+      },
+    });
   }
 
   return nodemailer.createTransport({
     host,
     port,
     secure: port === 465,
-    auth: { user, pass },
+    auth: { user, pass: cleanPass },
   });
 }
 
