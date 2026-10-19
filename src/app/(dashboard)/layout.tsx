@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,8 +34,15 @@ export default function DashboardLayout({
       <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-              <Building2 className="w-5 h-5" />
+            <div className="h-9 px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-700/60 flex items-center shadow-sm">
+              <Image
+                src="/images/logo.webp"
+                alt="CV. Asia Plastik"
+                width={271}
+                height={92}
+                priority
+                className="h-6 w-auto object-contain"
+              />
             </div>
             <div>
               <span className="font-black text-sm tracking-tight block">

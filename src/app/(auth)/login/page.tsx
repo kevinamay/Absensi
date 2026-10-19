@@ -157,18 +157,27 @@ function LoginContent() {
 
       {/* Floating Corporate Identity Header on Top Left */}
       <div className="absolute top-6 left-6 z-20 flex items-center gap-3">
-        <div className="w-11 h-11 rounded-2xl bg-blue-600/90 border border-white/30 text-white flex items-center justify-center shadow-lg shadow-blue-900/40 backdrop-blur-md">
-          <span className="font-black text-lg tracking-tighter">ap</span>
-        </div>
-        <div className="hidden sm:block">
-          <span className="text-sm font-black tracking-tight block text-white drop-shadow">
-            CV. ASIA PLASTIK
-          </span>
-          <span className="text-[11px] text-blue-300 font-semibold tracking-wider uppercase drop-shadow flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            Sidoarjo Plant & Headquarter
-          </span>
-        </div>
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="relative h-11 flex items-center px-3 py-1.5 rounded-2xl bg-slate-900/50 border border-white/20 backdrop-blur-md shadow-lg shadow-black/25 hover:bg-slate-900/60 transition-all">
+            <Image
+              src="/images/logo.webp"
+              alt="CV. Asia Plastik Logo"
+              width={271}
+              height={92}
+              priority
+              className="h-8 sm:h-9 w-auto object-contain filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
+            />
+          </div>
+          <div className="hidden sm:block">
+            <span className="text-sm font-black tracking-tight block text-white drop-shadow">
+              CV. ASIA PLASTIK
+            </span>
+            <span className="text-[11px] text-blue-300 font-bold tracking-wider uppercase drop-shadow flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Sidoarjo Plant & Headquarter
+            </span>
+          </div>
+        </Link>
       </div>
 
       {/* Centered Floating Frosted Card Container (Permanent Design B) */}
