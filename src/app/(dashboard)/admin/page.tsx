@@ -73,9 +73,10 @@ export default function AdminDashboard() {
               timestamp: new Date(),
               formattedDate: new Date().toISOString().split("T")[0],
               formattedTime: "07:48:12",
-              location: { latitude: -7.42431, longitude: 112.72141, accuracy: 4 },
+              location: { latitude: -7.33612, longitude: 112.76116, accuracy: 4 },
               distanceFromOfficeMeters: 18,
               isWithinGeofence: true,
+              officeName: "Kantor 1 (PT. Asia Plastik)",
               notes: "Inspeksi injection molding line 1",
               createdAt: new Date().toISOString(),
             },
@@ -91,9 +92,10 @@ export default function AdminDashboard() {
               timestamp: new Date(),
               formattedDate: new Date().toISOString().split("T")[0],
               formattedTime: "07:55:30",
-              location: { latitude: -7.42435, longitude: 112.72144, accuracy: 6 },
+              location: { latitude: -7.33529, longitude: 112.7565, accuracy: 6 },
               distanceFromOfficeMeters: 25,
               isWithinGeofence: true,
+              officeName: "Kantor 2 (CV. Asia Plastik)",
               notes: "Pengecekan sensor suhu chiller pabrik",
               createdAt: new Date().toISOString(),
             },
@@ -109,9 +111,10 @@ export default function AdminDashboard() {
               timestamp: new Date(),
               formattedDate: new Date().toISOString().split("T")[0],
               formattedTime: "08:24:10",
-              location: { latitude: -7.42439, longitude: 112.72148, accuracy: 5 },
+              location: { latitude: -7.33535, longitude: 112.75655, accuracy: 5 },
               distanceFromOfficeMeters: 40,
               isWithinGeofence: true,
+              officeName: "Kantor 2 (CV. Asia Plastik)",
               notes: "Kendala lalu lintas di bundaran Waru",
               createdAt: new Date().toISOString(),
             },
@@ -453,8 +456,8 @@ export default function AdminDashboard() {
                           {item.formattedTime} WIB
                         </td>
                         <td className="py-3 px-4">
-                          <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold block">
-                            {item.distanceFromOfficeMeters}m dari kantor
+                          <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold block truncate max-w-[160px]" title={item.officeName || "CV. Asia Plastik"}>
+                            {item.distanceFromOfficeMeters}m ({item.officeName || "Kantor"})
                           </span>
                           <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-mono">
                             ±{item.location.accuracy ? Math.round(item.location.accuracy) : 0}m GPS

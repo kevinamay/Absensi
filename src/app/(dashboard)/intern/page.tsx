@@ -303,7 +303,7 @@ export default function InternDashboard() {
                         </Badge>
                       </div>
                       <span className="text-xs text-slate-500 dark:text-slate-400 block mt-0.5">
-                        Waktu: {item.formattedTime} WIB • Jarak GPS: {item.distanceFromOfficeMeters}m
+                        Waktu: {item.formattedTime} WIB • Jarak GPS: {item.distanceFromOfficeMeters}m ({item.officeName || "CV. Asia Plastik"})
                       </span>
                       {item.notes && (
                         <p className="text-xs text-slate-600 dark:text-slate-300 italic mt-1 bg-white dark:bg-slate-900/80 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-800">
