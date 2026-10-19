@@ -12,6 +12,7 @@ import {
   AccountRejectedError,
 } from "@/services/authService";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { useGeolocation } from "@/hooks/useGeolocation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,6 +24,7 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
+  RefreshCw,
 } from "lucide-react";
 
 function LoginContent() {
@@ -38,6 +40,17 @@ function LoginContent() {
   const [pendingApprovalNotice, setPendingApprovalNotice] = useState<string | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [timeStr, setTimeStr] = useState("");
+
+  // Live Geolocation validation for CV. Asia Plastik factory geofence
+  const {
+    coordinates,
+    distanceMeters,
+    allowedRadiusMeters,
+    isWithinGeofence,
+    loading: geoLoading,
+    error: geoError,
+    refreshLocation,
+  } = useGeolocation();
 
   // Live WIB Clock
   useEffect(() => {
@@ -251,13 +264,50 @@ function LoginContent() {
               <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold">Waktu Operasional</span>
               <span className="text-sm font-black text-slate-900 dark:text-white font-mono">{timeStr || "08:15 WIB"}</span>
             </div>
-            <div className="p-2 border-l border-slate-900/10 dark:border-white/10">
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold">Radius Lokasi</span>
-              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono flex items-center justify-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                150m OK
+            <button
+              type="button"
+              onClick={refreshLocation}
+              title={
+                geoLoading
+                  ? "Sedang memindai lokasi GPS perangkat Anda..."
+                  : geoError
+                  ? geoError
+                  : coordinates
+                  ? `Jarak ke Pabrik: ${distanceMeters}m | Akurasi GPS: ±${Math.round(coordinates.accuracy || 0)}m | Klik untuk perbarui`
+                  : "Klik untuk memindai ulang lokasi GPS"
+              }
+              className="p-2 border-l border-slate-900/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 rounded-r-xl transition-all cursor-pointer group text-center flex flex-col justify-center items-center"
+            >
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold flex items-center justify-center gap-1">
+                Radius Lokasi ({allowedRadiusMeters}m)
+                <RefreshCw className={`w-2.5 h-2.5 text-slate-400 group-hover:text-blue-500 transition-transform ${geoLoading ? "animate-spin text-blue-500" : ""}`} />
               </span>
-            </div>
+              {geoLoading ? (
+                <span className="text-xs font-bold text-amber-500 font-mono flex items-center justify-center gap-1 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                  Memindai GPS...
+                </span>
+              ) : geoError ? (
+                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 font-mono flex items-center justify-center gap-1 mt-0.5" title={geoError}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                  Izin GPS Dibutuhkan
+                </span>
+              ) : isWithinGeofence ? (
+                <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono flex items-center justify-center gap-1 mt-0.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50" />
+                  {distanceMeters !== null ? `${distanceMeters}m OK` : "Dalam Radius"}
+                </span>
+              ) : (
+                <span className="text-xs font-black text-rose-600 dark:text-rose-400 font-mono flex items-center justify-center gap-1 mt-0.5">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                  {distanceMeters !== null
+                    ? distanceMeters >= 1000
+                      ? `${(distanceMeters / 1000).toFixed(1)}km Luar`
+                      : `${distanceMeters}m Luar Area`
+                    : "Luar Area"}
+                </span>
+              )}
+            </button>
           </div>
 
           <form onSubmit={handleLoginSubmit} className="space-y-4" suppressHydrationWarning>

@@ -75,7 +75,56 @@ export function useGeolocation() {
   }, []);
 
   useEffect(() => {
+    if (!navigator.geolocation) {
+      setState((prev) => ({
+        ...prev,
+        loading: false,
+        error: "Perangkat atau browser Anda tidak mendukung GPS / Geolocation.",
+      }));
+      return;
+    }
+
     getPosition();
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const { latitude, longitude, accuracy } = position.coords;
+        const coords: GeoLocationCoordinates = { latitude, longitude, accuracy };
+        const geoCheck = attendanceService.checkGeofence(latitude, longitude);
+
+        setState({
+          coordinates: coords,
+          distanceMeters: geoCheck.distanceMeters,
+          allowedRadiusMeters: geoCheck.allowedRadiusMeters,
+          isWithinGeofence: geoCheck.isWithinGeofence,
+          loading: false,
+          error: null,
+        });
+      },
+      (err) => {
+        setState((prev) => {
+          if (prev.coordinates) return prev;
+          let errorMsg = "Gagal mendapatkan lokasi GPS.";
+          if (err.code === err.PERMISSION_DENIED) {
+            errorMsg = "Akses lokasi ditolak. Harap izinkan akses lokasi di browser untuk absensi.";
+          } else if (err.code === err.POSITION_UNAVAILABLE) {
+            errorMsg = "Informasi lokasi GPS tidak tersedia.";
+          } else if (err.code === err.TIMEOUT) {
+            errorMsg = "Waktu permintaan lokasi habis. Silakan coba lagi.";
+          }
+          return { ...prev, loading: false, error: errorMsg };
+        });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000,
+      }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
   }, [getPosition]);
 
   /**
