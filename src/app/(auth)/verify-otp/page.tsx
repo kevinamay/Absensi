@@ -44,9 +44,9 @@ function VerifyOtpContent() {
     const qName = searchParams.get("name");
     const qInst = searchParams.get("inst");
 
-    if (qEmail) setEmail(qEmail);
-    if (qName) setFullName(qName);
-    if (qInst) setInstitution(qInst);
+    let resolvedEmail = qEmail || "";
+    let resolvedName = qName || "";
+    let resolvedInst = qInst || "";
 
     // Also attempt to restore staged data from sessionStorage
     if (typeof window !== "undefined") {
@@ -54,12 +54,21 @@ function VerifyOtpContent() {
       if (staged) {
         try {
           const parsed = JSON.parse(staged);
-          if (!qEmail && parsed.email) setEmail(parsed.email);
-          if (!qName && parsed.fullName) setFullName(parsed.fullName);
-          if (!qInst && parsed.institution) setInstitution(parsed.institution);
+          if (!resolvedEmail && parsed.email) resolvedEmail = parsed.email;
+          if (!resolvedName && parsed.fullName) resolvedName = parsed.fullName;
+          if (!resolvedInst && parsed.institution) resolvedInst = parsed.institution;
         } catch (e) {}
       }
     }
+
+    // Default to applicant's Gmail if opened directly without query params
+    if (!resolvedEmail) {
+      resolvedEmail = "kevinamay23@gmail.com";
+    }
+
+    setEmail(resolvedEmail);
+    if (resolvedName) setFullName(resolvedName);
+    if (resolvedInst) setInstitution(resolvedInst);
   }, [searchParams]);
 
   // Focus first OTP input on mount
