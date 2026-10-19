@@ -259,13 +259,26 @@ function VerifyOtpContent() {
                 </div>
               )}
 
-              {/* Success Info Banner */}
-              {successInfo && !errorMessage && (
-                <div className="mb-5 p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-800 dark:text-emerald-200 text-xs flex items-center gap-2 backdrop-blur-md">
-                  <Sparkles className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                  <p className="font-medium">{successInfo}</p>
+              {/* Development / Testing OTP Display Banner */}
+              <div className="mb-5 p-3.5 rounded-2xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/30 text-blue-900 dark:text-cyan-200 text-xs flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-blue-600 dark:text-cyan-400 shrink-0" />
+                  <div>
+                    <span className="font-bold block">Kode OTP Verifikasi:</span>
+                    <span className="text-[10px] text-blue-600 dark:text-cyan-400 font-semibold">Klik kode untuk auto-fill langsung</span>
+                  </div>
                 </div>
-              )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDigitChange(0, "123456");
+                  }}
+                  className="font-mono font-black text-sm tracking-widest bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-3.5 py-1.5 rounded-xl cursor-pointer transition-all shadow-md active:scale-95 border border-blue-400/40"
+                  title="Klik untuk otomatis mengisi kode 123456"
+                >
+                  123456
+                </button>
+              </div>
 
               <form onSubmit={handleVerify} className="space-y-6" suppressHydrationWarning>
                 {/* 6 Digit Input Boxes */}
