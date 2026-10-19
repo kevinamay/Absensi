@@ -19,10 +19,7 @@ export async function POST(request: Request) {
 
     const record = await otpStore.getOtp(cleanEmail);
 
-    // Development backdoor: allows 123456 in dev/test environment
-    const isMasterCode = process.env.NODE_ENV !== "production" && cleanOtp === "123456";
-
-    if (!record && !isMasterCode) {
+    if (!record) {
       return NextResponse.json(
         {
           success: false,
@@ -32,7 +29,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!isMasterCode && record && record.otp !== cleanOtp) {
+    if (record.otp !== cleanOtp) {
       return NextResponse.json(
         {
           success: false,
