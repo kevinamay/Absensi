@@ -112,37 +112,46 @@ function RegisterContent() {
     setValidationError(null);
 
     try {
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanName = fullName.trim();
+      const cleanInst = institution.trim();
+
       /**
-       * Open Registration Flow:
-       * 1. Register with fullName, institution, email, password
-       * 2. Backend dispatches 6-digit OTP code to email
-       * 3. Redirects to /verify-otp
+       * Realtime Direct OTP Dispatch:
+       * Dispatches 6-digit OTP code directly to applicant's email via Resend API
        */
-      await register(
-        email.trim().toLowerCase(),
-        password,
-        fullName.trim(),
-        institution.trim()
-      );
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: cleanEmail,
+          fullName: cleanName,
+          institution: cleanInst,
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "Gagal mengirimkan kode OTP ke email.");
+      }
 
       // Save staged data to sessionStorage so verify-otp page can access it seamlessly
       if (typeof window !== "undefined") {
         sessionStorage.setItem(
           "cv_asia_registration_staged",
           JSON.stringify({
-            email: email.trim().toLowerCase(),
-            fullName: fullName.trim(),
-            institution: institution.trim(),
+            email: cleanEmail,
+            fullName: cleanName,
+            institution: cleanInst,
+            password,
           })
         );
       }
 
       router.push(
-        `/verify-otp?email=${encodeURIComponent(
-          email.trim().toLowerCase()
-        )}&name=${encodeURIComponent(fullName.trim())}&inst=${encodeURIComponent(
-          institution.trim()
-        )}`
+        `/verify-otp?email=${encodeURIComponent(cleanEmail)}&name=${encodeURIComponent(
+          cleanName
+        )}&inst=${encodeURIComponent(cleanInst)}`
       );
     } catch (err: any) {
       console.warn("Registration attempt failed:", err);

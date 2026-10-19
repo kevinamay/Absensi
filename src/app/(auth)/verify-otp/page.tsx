@@ -34,8 +34,8 @@ function VerifyOtpContent() {
   const [successInfo, setSuccessInfo] = useState<string | null>(null);
   const [isApprovedPending, setIsApprovedPending] = useState(false);
 
-  // 30 seconds countdown for resend
-  const [timeLeft, setTimeLeft] = useState(30);
+  // Initial countdown 0 so user can immediately click resend if code not received yet
+  const [timeLeft, setTimeLeft] = useState(0);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -157,18 +157,41 @@ function VerifyOtpContent() {
   };
 
   const handleResendOtp = async () => {
-    if (timeLeft > 0 || resending) return;
+    if (resending || timeLeft > 0) return;
+
+    let targetEmail = (email || searchParams.get("email") || "").trim().toLowerCase();
+    let targetName = fullName || searchParams.get("name") || "";
+    let targetInst = institution || searchParams.get("inst") || "";
+
+    if (!targetEmail && typeof window !== "undefined") {
+      const staged = sessionStorage.getItem("cv_asia_registration_staged");
+      if (staged) {
+        try {
+          const parsed = JSON.parse(staged);
+          if (parsed.email) targetEmail = parsed.email.trim().toLowerCase();
+          if (parsed.fullName) targetName = parsed.fullName.trim();
+          if (parsed.institution) targetInst = parsed.institution.trim();
+        } catch (e) {}
+      }
+    }
+
+    if (!targetEmail) {
+      setErrorMessage("Alamat email tidak ditemukan. Silakan kembali ke formulir pendaftaran.");
+      return;
+    }
+
     setResending(true);
     setErrorMessage(null);
+    setSuccessInfo(null);
 
     try {
       const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-          fullName,
-          institution,
+          email: targetEmail,
+          fullName: targetName,
+          institution: targetInst,
         }),
       });
 
@@ -178,8 +201,8 @@ function VerifyOtpContent() {
       }
 
       setOtpDigits(["", "", "", "", "", ""]);
-      setTimeLeft(30);
-      setSuccessInfo("Kode OTP baru telah berhasil dikirimkan ke kotak masuk email Anda.");
+      setTimeLeft(15); // 15 seconds quick debounce
+      setSuccessInfo(`Kode OTP baru telah berhasil dikirim ke ${targetEmail}. Silakan cek kotak masuk Gmail Anda.`);
       inputRefs.current[0]?.focus();
     } catch (err: any) {
       setErrorMessage(err.message || "Gagal mengirim ulang OTP.");
@@ -295,17 +318,18 @@ function VerifyOtpContent() {
                 {/* Resend OTP Timer & Button */}
                 <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1">
                   <div className="flex items-center gap-1.5 font-medium">
-                    <Clock className="w-3.5 h-3.5" />
+                    <Clock className="w-3.5 h-3.5 text-blue-500" />
                     {timeLeft > 0 ? (
                       <span>
                         Kirim ulang dalam{" "}
                         <strong className="font-mono text-slate-800 dark:text-slate-200">
-                          {String(Math.floor(timeLeft / 60)).padStart(2, "0")}:
-                          {String(timeLeft % 60).padStart(2, "0")}
+                          {timeLeft}s
                         </strong>
                       </span>
                     ) : (
-                      <span>Kode kadaluarsa</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                        Siap kirim kode
+                      </span>
                     )}
                   </div>
 
@@ -313,14 +337,14 @@ function VerifyOtpContent() {
                     type="button"
                     onClick={handleResendOtp}
                     disabled={timeLeft > 0 || resending}
-                    className={`font-bold inline-flex items-center gap-1 transition-colors ${
+                    className={`font-bold inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs transition-all ${
                       timeLeft > 0 || resending
-                        ? "text-slate-400 cursor-not-allowed opacity-50"
-                        : "text-blue-600 dark:text-cyan-400 hover:underline cursor-pointer"
+                        ? "bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-400 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-500 text-white border-blue-500 shadow-md shadow-blue-600/30 cursor-pointer"
                     }`}
                   >
-                    <RotateCcw className={`w-3 h-3 ${resending ? "animate-spin" : ""}`} />
-                    Kirim Ulang Kode
+                    <RotateCcw className={`w-3.5 h-3.5 ${resending ? "animate-spin" : ""}`} />
+                    {resending ? "Mengirim ke Email..." : "Kirim Ulang Kode Sekarang"}
                   </button>
                 </div>
 
