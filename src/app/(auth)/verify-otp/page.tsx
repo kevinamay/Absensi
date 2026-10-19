@@ -257,10 +257,6 @@ function VerifyOtpContent() {
             <span className="text-sm font-black tracking-tight block text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
               CV. ASIA PLASTIK
             </span>
-            <span className="text-[11px] text-blue-300 font-bold tracking-wider uppercase drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-sm shadow-emerald-400/80" />
-              Sidoarjo Plant & Headquarter
-            </span>
           </div>
         </Link>
       </div>
