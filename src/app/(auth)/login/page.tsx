@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { WhitelistAccessDeniedError } from "@/services/whitelistService";
 import { EmailNotVerifiedError } from "@/services/authService";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { PrototypeSwitcher, PrototypeVariantInfo } from "@/components/prototype/PrototypeSwitcher";
 import { VariantA } from "./variants/VariantA";
 import { VariantB } from "./variants/VariantB";
@@ -136,6 +137,9 @@ function LoginContent() {
 
   return (
     <>
+      {/* Floating Theme Toggle (Light / Dark Mode) */}
+      <ThemeToggle />
+
       {currentVariant === "B" && <VariantB {...variantProps} />}
       {currentVariant === "C" && <VariantC {...variantProps} />}
       {currentVariant !== "B" && currentVariant !== "C" && <VariantA {...variantProps} />}
