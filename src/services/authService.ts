@@ -100,20 +100,7 @@ export const authService = {
   }): Promise<{ success: boolean; email: string }> {
     const normalizedEmail = data.email.trim().toLowerCase();
 
-    try {
-      // Create user in Firebase Auth
-      await createUserWithEmailAndPassword(auth, normalizedEmail, data.pass);
-    } catch (fbAuthErr: any) {
-      // If user already exists or in local demo mode, handle gracefully
-      if (fbAuthErr.code !== "auth/email-already-in-use" && !fbAuthErr.message?.includes("API key")) {
-        console.warn("Notice during Firebase user creation:", fbAuthErr.message);
-      }
-    } finally {
-      // Always ensure session is signed out until OTP verified and HRD approved
-      await signOut(auth).catch(() => {});
-    }
-
-    // Dispatch 6-digit OTP code to applicant's email
+    // 1. Dispatch 6-digit OTP code to applicant's email FIRST (Realtime & Instant)
     const res = await fetch("/api/auth/send-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -127,6 +114,19 @@ export const authService = {
     const json = await res.json();
     if (!res.ok || !json.success) {
       throw new Error(json.error || "Gagal mengirimkan kode OTP ke email.");
+    }
+
+    // 2. Safely create or prepare credentials without blocking OTP delivery
+    try {
+      await createUserWithEmailAndPassword(auth, normalizedEmail, data.pass);
+    } catch (fbAuthErr: any) {
+      // If user already exists or in local demo mode, handle gracefully
+      if (fbAuthErr.code !== "auth/email-already-in-use" && !fbAuthErr.message?.includes("API key")) {
+        console.warn("Notice during Firebase user creation:", fbAuthErr.message);
+      }
+    } finally {
+      // Always ensure session is signed out until OTP verified and HRD approved
+      await signOut(auth).catch(() => {});
     }
 
     return { success: true, email: normalizedEmail };

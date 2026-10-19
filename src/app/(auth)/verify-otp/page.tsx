@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   Clock,
   Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 
 function VerifyOtpContent() {
@@ -33,8 +34,8 @@ function VerifyOtpContent() {
   const [successInfo, setSuccessInfo] = useState<string | null>(null);
   const [isApprovedPending, setIsApprovedPending] = useState(false);
 
-  // 60 seconds countdown for resend
-  const [timeLeft, setTimeLeft] = useState(60);
+  // 30 seconds countdown for resend
+  const [timeLeft, setTimeLeft] = useState(30);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -177,8 +178,8 @@ function VerifyOtpContent() {
       }
 
       setOtpDigits(["", "", "", "", "", ""]);
-      setTimeLeft(60);
-      setSuccessInfo("Kode OTP baru telah dikirimkan ke kotak masuk email Anda.");
+      setTimeLeft(30);
+      setSuccessInfo("Kode OTP baru telah berhasil dikirimkan ke kotak masuk email Anda.");
       inputRefs.current[0]?.focus();
     } catch (err: any) {
       setErrorMessage(err.message || "Gagal mengirim ulang OTP.");
@@ -244,12 +245,23 @@ function VerifyOtpContent() {
                   Masukkan Kode OTP
                 </h1>
                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 max-w-sm mx-auto leading-relaxed">
-                  Kode 6-digit telah dikirimkan ke alamat email:
+                  Kode 6-digit telah dikirimkan secara langsung ke email:
                 </p>
                 <p className="text-xs font-bold text-blue-600 dark:text-cyan-300 mt-0.5 font-mono">
                   {email || "email.anda@domain.com"}
                 </p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-400 mt-1">
+                  (Cek kotak masuk utama atau folder Spam jika belum muncul)
+                </p>
               </div>
+
+              {/* Success Info Banner */}
+              {successInfo && (
+                <div className="mb-5 p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-800 dark:text-emerald-200 text-xs flex items-start gap-2.5 backdrop-blur-md animate-in fade-in">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500 mt-0.5" />
+                  <p className="font-semibold leading-relaxed">{successInfo}</p>
+                </div>
+              )}
 
               {/* Error Banner */}
               {errorMessage && (

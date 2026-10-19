@@ -9,10 +9,14 @@ interface EmailResult {
   error?: string;
 }
 
+let _resendClient: Resend | null = null;
+
 function getResendClient() {
+  if (_resendClient) return _resendClient;
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return null;
-  return new Resend(apiKey);
+  _resendClient = new Resend(apiKey);
+  return _resendClient;
 }
 
 function getTransporter() {
@@ -54,7 +58,8 @@ export const emailService = {
     const transporter = getTransporter();
     const fromAddress = process.env.SMTP_FROM || `"HRD CV. Asia Plastik" <no-reply@asiaplastik.com>`;
 
-    const subject = `[CV. Asia Plastik] Kode Verifikasi OTP Pendaftaran: ${otp}`;
+    // Place OTP code in front of subject so Gmail does not group it into old threads and user sees it instantly
+    const subject = `[KODE OTP: ${otp}] Verifikasi Pendaftaran Magang CV. Asia Plastik`;
     const html = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
         <div style="background: linear-gradient(135deg, #1e3a8a, #2563eb); padding: 32px 24px; text-align: center; color: #ffffff;">
