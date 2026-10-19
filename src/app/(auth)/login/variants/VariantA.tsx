@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -22,6 +23,11 @@ import {
 } from "lucide-react";
 import { LoginVariantProps } from "./types";
 
+/**
+ * VARIAN A: Split-View Corporate Showcase
+ * Foto gedung CV. Asia Plastik tampil megah di sisi kiri dengan overlay gradien tipis,
+ * sedangkan form login di sisi kanan sangat bersih, mudah dibaca, dan elegan.
+ */
 export function VariantA({
   email,
   setEmail,
@@ -38,131 +44,76 @@ export function VariantA({
   return (
     <div className="min-h-screen w-full relative overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col lg:flex-row transition-colors duration-300">
       {/* ============================================================== */}
-      {/* BACKGROUND A: DYNAMIC AURORA MESH (LIGHT & DARK ADAPTIVE)      */}
+      {/* LEFT COLUMN: Real CV. Asia Plastik Building Showcase           */}
       {/* ============================================================== */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        {/* Soft pastel ambient glows for Light mode, intense neon for Dark mode */}
-        <div
-          className="absolute -top-[20%] -left-[10%] w-[55vw] h-[55vw] rounded-full bg-gradient-to-br from-blue-400/25 via-indigo-400/15 to-transparent dark:from-blue-600/30 dark:via-indigo-600/20 blur-[130px] animate-pulse"
-          style={{ animationDuration: "8s" }}
-        />
-        <div className="absolute top-[40%] -right-[15%] w-[50vw] h-[50vw] rounded-full bg-gradient-to-tr from-cyan-400/20 via-sky-400/15 to-purple-400/15 dark:from-cyan-500/20 dark:via-blue-600/20 dark:to-purple-600/15 blur-[140px]" />
-        <div className="absolute -bottom-[15%] left-[25%] w-[45vw] h-[45vw] rounded-full bg-gradient-to-t from-indigo-300/20 via-blue-300/15 to-transparent dark:from-indigo-700/25 dark:via-blue-800/15 blur-[130px]" />
+      <div className="lg:w-1/2 min-h-[420px] lg:min-h-screen relative flex flex-col justify-between p-8 sm:p-12 lg:p-16 overflow-hidden">
+        {/* Background Building Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/asia-plastik-building.png"
+            alt="Gedung Utama CV. Asia Plastik Sidoarjo"
+            fill
+            priority
+            className="object-cover object-center filter contrast-[1.05]"
+          />
+          {/* Subtle gradient overlay to keep text legible while preserving the building photo */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/30" />
+        </div>
 
-        {/* Adaptive Micro Dot Grid Overlay */}
-        <div
-          className="absolute inset-0 opacity-30 dark:opacity-20"
-          style={{
-            backgroundImage: `radial-gradient(circle, currentColor 1px, transparent 1px)`,
-            backgroundSize: "28px 28px",
-          }}
-        />
-
-        {/* Diagonal Tech Scanlines */}
-        <div
-          className="absolute inset-0 opacity-10 dark:opacity-5"
-          style={{
-            backgroundImage: `repeating-linear-gradient(45deg, currentColor 0, currentColor 1px, transparent 0, transparent 50%)`,
-            backgroundSize: "12px 12px",
-          }}
-        />
-      </div>
-
-      {/* ============================================================== */}
-      {/* LEFT COLUMN: Corporate Identity & Telemetry Widgets            */}
-      {/* ============================================================== */}
-      <div className="lg:w-1/2 p-8 sm:p-12 lg:p-16 flex flex-col justify-between relative z-10 border-b lg:border-b-0 lg:border-r border-slate-200/80 dark:border-white/10 backdrop-blur-md bg-white/50 dark:bg-slate-950/40 transition-colors duration-300">
-        <div>
-          {/* Header branding */}
-          <div className="flex items-center gap-3.5 mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25 border border-white/40">
-              <Building2 className="w-6 h-6" />
+        {/* Top Header Branding over Building */}
+        <div className="relative z-10">
+          <div className="flex items-center gap-3.5 mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-xl shadow-blue-900/50 border border-white/40 backdrop-blur-md">
+              <span className="font-black text-xl tracking-tighter">ap</span>
             </div>
             <div>
-              <span className="text-xl font-black tracking-tight block text-slate-900 dark:text-white">
+              <span className="text-xl font-black tracking-tight block text-white drop-shadow-md">
                 CV. ASIA PLASTIK
               </span>
-              <span className="text-xs text-blue-600 dark:text-cyan-400 font-semibold tracking-wider uppercase flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-cyan-400 animate-ping" />
+              <span className="text-xs text-blue-300 font-semibold tracking-wider uppercase flex items-center gap-1.5 drop-shadow">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
                 Industry & Injection Moulding • Sidoarjo
               </span>
             </div>
           </div>
 
-          {/* Kemnaker partnership badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/20 dark:border-blue-400/30 text-blue-700 dark:text-blue-200 text-xs font-semibold mb-6 shadow-sm backdrop-blur-sm">
-            <Factory className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
-            Program Magang Bersertifikat Kementerian Ketenagakerjaan RI
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-900/80 border border-blue-400/40 text-blue-100 text-xs font-semibold mb-4 shadow-md backdrop-blur-md">
+            <Factory className="w-4 h-4 text-cyan-300" />
+            Kantor & Pabrik Utama Sidoarjo, Jawa Timur
           </div>
+        </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight mb-4 text-slate-900 dark:text-white">
+        {/* Bottom Hero Text & Telemetry over Building */}
+        <div className="relative z-10 pt-12">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight mb-4 text-white drop-shadow-lg">
             Portal Presensi <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-800 dark:from-blue-400 dark:via-cyan-300 dark:to-indigo-300">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-cyan-200 to-white">
               Peserta Magang Resmi
             </span>
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-lg leading-relaxed mb-8">
-            Sistem pencatatan kehadiran presisi berbasis geolokasi dan verifikasi akun terdaftar bagi siswa & mahasiswa magang di pabrik CV. Asia Plastik Sidoarjo.
+          <p className="text-sm sm:text-base text-slate-200 max-w-lg leading-relaxed mb-6 drop-shadow">
+            Sistem pencatatan kehadiran mandiri terintegrasi SIAPkerja & MagangHub Kemnaker RI dengan validasi lokasi pabrik CV. Asia Plastik.
           </p>
 
-          {/* Telemetry and Geofence status tiles */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-w-lg mb-8">
-            <div className="p-4 rounded-2xl bg-white/80 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-lg backdrop-blur-xl hover:border-blue-400/40 transition-all">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
-                <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                Waktu Operasional Pabrik
-              </div>
-              <div className="text-xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
-                {timeStr || "08:00:00 WIB"}
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                Jam Masuk: 08:00 WIB (Toleransi 15 mnt)
-              </p>
+          {/* Quick HUD chips */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/85 border border-white/20 text-white text-xs font-mono shadow-md backdrop-blur-md">
+              <Clock className="w-4 h-4 text-emerald-400" />
+              <span>{timeStr || "08:00:00 WIB"}</span>
             </div>
-
-            <div className="p-4 rounded-2xl bg-white/80 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-lg backdrop-blur-xl hover:border-blue-400/40 transition-all">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
-                <MapPin className="w-4 h-4 text-rose-500 dark:text-rose-400" />
-                Geofence Radius Presensi
-              </div>
-              <div className="text-xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-                Radius 150m Aktif
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                Pabrik Sidoarjo, Jawa Timur
-              </p>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/85 border border-white/20 text-white text-xs font-mono shadow-md backdrop-blur-md">
+              <MapPin className="w-4 h-4 text-rose-400" />
+              <span>Geofence 150m Aktif</span>
             </div>
           </div>
-
-          {/* Security Architecture list */}
-          <div className="space-y-2.5 max-w-lg">
-            <div className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 bg-white/70 dark:bg-white/[0.03] p-2.5 rounded-xl border border-slate-200/60 dark:border-white/5">
-              <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-cyan-400 shrink-0" />
-              <span>Strict Whitelist Query via Cloud Firestore (<code className="text-blue-600 dark:text-cyan-300 font-mono text-[11px]">allowed_interns</code>)</span>
-            </div>
-            <div className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 bg-white/70 dark:bg-white/[0.03] p-2.5 rounded-xl border border-slate-200/60 dark:border-white/5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>Autentikasi Terenkripsi Firebase Auth & Email Verification</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom trust footer */}
-        <div className="pt-6 mt-8 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
-            <span>Sistem Keamanan Whitelist Terverifikasi</span>
-          </div>
-          <span className="font-mono text-[11px]">Presensi Intern v2.4 • Variant A</span>
         </div>
       </div>
 
       {/* ============================================================== */}
-      {/* RIGHT COLUMN: Elevated Glassmorphic Card                       */}
+      {/* RIGHT COLUMN: Clean, Focused Authentication Canvas            */}
       {/* ============================================================== */}
-      <div className="lg:w-1/2 p-6 sm:p-12 lg:p-16 flex items-center justify-center relative z-10">
+      <div className="lg:w-1/2 p-6 sm:p-12 lg:p-16 flex items-center justify-center relative z-10 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md transition-colors duration-300">
         <div className="w-full max-w-md">
           {/* Header titles */}
           <div className="mb-6">
@@ -204,10 +155,8 @@ export function VariantA({
             </div>
           )}
 
-          {/* Glassmorphic Login Card */}
-          <div className="rounded-3xl border border-slate-200/90 dark:border-white/20 bg-white/95 dark:bg-slate-900/75 p-6 sm:p-8 shadow-2xl backdrop-blur-2xl ring-1 ring-slate-900/5 dark:ring-white/10 relative overflow-hidden transition-colors duration-300">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
-
+          {/* Login Card */}
+          <div className="rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-slate-900/90 p-6 sm:p-8 shadow-2xl backdrop-blur-2xl ring-1 ring-slate-900/5 dark:ring-white/10 relative overflow-hidden transition-colors duration-300">
             <div className="flex items-center justify-between pb-5 border-b border-slate-200 dark:border-white/10 mb-5">
               <span className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -279,7 +228,7 @@ export function VariantA({
 
               <Button
                 type="submit"
-                className="w-full py-3.5 font-bold mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 dark:from-blue-600 dark:via-indigo-600 dark:to-cyan-600 dark:hover:from-blue-500 dark:hover:to-cyan-500 text-white shadow-lg shadow-blue-600/30 border border-blue-400/30 rounded-xl"
+                className="w-full py-3.5 font-bold mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-600/30 border border-blue-400/30 rounded-xl"
                 isLoading={submitting}
                 disabled={submitting}
               >

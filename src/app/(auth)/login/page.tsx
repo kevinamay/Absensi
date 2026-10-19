@@ -15,18 +15,18 @@ import { LoginVariantProps } from "./variants/types";
 const PROTOTYPE_BACKGROUND_VARIANTS: PrototypeVariantInfo[] = [
   {
     id: "A",
-    name: "A (Fluid Aurora & Glass)",
-    description: "Mesh gradient dinamis, micro-dots tech grid, glowing ambient orbs, dan kartu frosted glass modern.",
+    name: "A (Split Showcase Gedung)",
+    description: "Showcase megah foto gedung CV. Asia Plastik di sisi kiri & form login bersih di sisi kanan.",
   },
   {
     id: "B",
-    name: "B (Industrial Plant Backdrop)",
-    description: "Foto nyata lini produksi injection moulding pabrik CV. Asia Plastik & panel HUD industrial.",
+    name: "B (Full-Bleed Immersive Glass)",
+    description: "Foto gedung layar penuh imersif dengan kartu frosted glass melayang di tengah.",
   },
   {
     id: "C",
-    name: "C (Blueprint Matrix & CAD)",
-    description: "Grid koordinat blueprint CAD, aksen teknikal presisi, dan tipografi monospaced.",
+    name: "C (Angled Fasad Geometry)",
+    description: "Desain dinamis terinspirasi dari sudut panel trapesium biru & silver fasad gedung.",
   },
 ];
 
