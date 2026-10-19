@@ -45,6 +45,7 @@ export function ThemeToggle({
     <button
       type="button"
       onClick={toggleTheme}
+      suppressHydrationWarning
       aria-label={isDark ? "Ubah ke Mode Terang" : "Ubah ke Mode Gelap"}
       title={isDark ? "Klik untuk Mode Terang (Light)" : "Klik untuk Mode Gelap (Dark)"}
       className={`${baseStyles} ${themeSpecificStyles} ${className} cursor-pointer`}
