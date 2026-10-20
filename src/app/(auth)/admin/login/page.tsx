@@ -12,17 +12,16 @@ import {
   Lock,
   Mail,
   AlertCircle,
-  KeyRound,
-  Sparkles,
   ArrowLeft,
   Eye,
   EyeOff,
   Shield,
+  KeyRound,
 } from "lucide-react";
 
 function AdminLoginContent() {
   const router = useRouter();
-  const { login, setDemoUser } = useAuth();
+  const { loginAdmin } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,21 +40,16 @@ function AdminLoginContent() {
 
     setSubmitting(true);
     try {
-      await login(email, password);
+      await loginAdmin(email, password);
       router.push("/admin");
     } catch (err: any) {
-      console.warn("Direct Firebase Admin login error:", err);
+      console.warn("Direct HRD Admin login error:", err);
       setErrorMessage(
-        "Gagal masuk. Pastikan akun email Anda sudah didaftarkan oleh IT di Firebase Console."
+        err.message || "Email atau kata sandi administrator salah. Pastikan kredensial benar."
       );
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const handleQuickDemo = () => {
-    setDemoUser("admin");
-    router.push("/admin");
   };
 
   return (
@@ -197,25 +191,8 @@ function AdminLoginContent() {
             </Button>
           </form>
 
-          {/* Quick Demo Simulator */}
-          <div className="mt-5 pt-4 border-t border-slate-200 dark:border-white/10 text-center">
-            <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              Mode Cepat untuk Pengujian (Evaluasi):
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleQuickDemo}
-              className="w-full text-xs font-bold py-2.5 rounded-xl border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-            >
-              Masuk Langsung sbg Supervisor HR
-            </Button>
-          </div>
-
           {/* Back to Intern Login Link */}
-          <div className="mt-4 pt-3 text-center border-t border-slate-100 dark:border-white/5">
+          <div className="mt-5 pt-4 text-center border-t border-slate-200 dark:border-white/10">
             <Link
               href="/login"
               className="text-xs font-semibold text-blue-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1"

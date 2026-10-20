@@ -11,6 +11,7 @@ interface AuthContextType {
   firebaseUser: User | null;
   loading: boolean;
   login: (email: string, pass: string) => Promise<void>;
+  loginAdmin: (email: string, pass: string) => Promise<void>;
   register: (
     email: string,
     pass: string,
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType>({
   firebaseUser: null,
   loading: true,
   login: async () => {},
+  loginAdmin: async () => {},
   register: async () => ({ success: false, email: "" }),
   loginWithSiapkerja: async () => {},
   logout: async () => {},
@@ -178,6 +180,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   /**
+   * Official Login for HRD & Supervisors
+   */
+  const loginAdmin = async (email: string, pass: string) => {
+    setLoading(true);
+    try {
+      const { user: adminProfile } = await authService.loginAdmin(email, pass);
+
+      // Set cookie for Next.js proxy route protection
+      document.cookie = `cv_asia_session=${encodeURIComponent(
+        JSON.stringify({ ...adminProfile, whitelisted: true })
+      )}; path=/; max-age=86400; SameSite=Lax`;
+
+      localStorage.setItem("cv_asia_demo_user", JSON.stringify({ ...adminProfile, whitelisted: true }));
+      setUser(adminProfile);
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
    * Complete logout & token cleanup
    */
   const logout = async () => {
@@ -246,6 +270,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         firebaseUser,
         loading,
         login,
+        loginAdmin,
         register,
         loginWithSiapkerja,
         logout,

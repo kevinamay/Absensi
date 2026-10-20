@@ -329,6 +329,30 @@ export const authService = {
   },
 
   /**
+   * Log in Administrator / HR Supervisor
+   */
+  async loginAdmin(
+    email: string,
+    pass: string
+  ): Promise<{ user: UserProfile; success: boolean }> {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Call server-side admin login API route
+    const res = await fetch("/api/auth/admin-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: normalizedEmail, password: pass }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || "Email atau kata sandi administrator tidak valid.");
+    }
+
+    return { user: data.user, success: true };
+  },
+
+  /**
    * Log out current user
    */
   async logout(): Promise<void> {
