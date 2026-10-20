@@ -296,9 +296,9 @@ export function VariantC({
               >
                 <div className="flex items-center justify-between mb-2">
                   <UserCheck className="w-5 h-5" />
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20">
-                    Opsi 1
-                  </span>
+                  {mainStatus === "HADIR" && (
+                    <span className="w-2 h-2 rounded-full bg-white shadow-xs animate-pulse" />
+                  )}
                 </div>
                 <div className="font-black text-sm">Hadir</div>
                 <div className="text-[10px] opacity-80 mt-0.5">Bekerja di pabrik</div>
@@ -316,9 +316,9 @@ export function VariantC({
               >
                 <div className="flex items-center justify-between mb-2">
                   <FileText className="w-5 h-5" />
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20">
-                    Opsi 2
-                  </span>
+                  {mainStatus === "IZIN_DENGAN_KETERANGAN" && (
+                    <span className="w-2 h-2 rounded-full bg-white shadow-xs animate-pulse" />
+                  )}
                 </div>
                 <div className="font-black text-sm">Izin / Sakit</div>
                 <div className="text-[10px] opacity-80 mt-0.5">Dengan bukti surat</div>
@@ -336,9 +336,9 @@ export function VariantC({
               >
                 <div className="flex items-center justify-between mb-2">
                   <FileQuestion className="w-5 h-5" />
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20">
-                    Opsi 3
-                  </span>
+                  {mainStatus === "IZIN_TANPA_KETERANGAN" && (
+                    <span className="w-2 h-2 rounded-full bg-white shadow-xs animate-pulse" />
+                  )}
                 </div>
                 <div className="font-black text-sm">Tanpa Surat</div>
                 <div className="text-[10px] opacity-80 mt-0.5">Izin tanpa berkas</div>
