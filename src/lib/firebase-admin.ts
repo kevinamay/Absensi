@@ -37,6 +37,13 @@ function createFirebaseAdminApp(): App {
   });
 }
 
+export const isFirebaseAdminConfigured = Boolean(
+  adminConfig.privateKey &&
+  adminConfig.clientEmail &&
+  !adminConfig.privateKey.includes("MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC...") &&
+  !adminConfig.clientEmail.includes("xxxxx")
+);
+
 const adminApp = createFirebaseAdminApp();
 const adminAuth: Auth = getAuth(adminApp);
 const adminDb: Firestore = getFirestore(adminApp);

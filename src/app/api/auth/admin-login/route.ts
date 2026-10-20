@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { adminAuth, adminDb, isFirebaseAdminConfigured } from "@/lib/firebase-admin";
 
 /**
  * Official HRD & Supervisor Credentials for CV. Asia Plastik
@@ -53,44 +53,44 @@ export async function POST(request: Request) {
       );
     }
 
-    // Backend registration & synchronization with Firebase Admin
+    // Backend registration & synchronization with Firebase Admin (only if service account credentials are provided)
     let uid = `admin-${cleanEmail.replace(/[^a-zA-Z0-9]/g, "")}`;
-    try {
+    if (isFirebaseAdminConfigured) {
       try {
-        const existingFbUser = await adminAuth.getUserByEmail(cleanEmail);
-        uid = existingFbUser.uid;
-      } catch (getErr: any) {
-        if (getErr.code === "auth/user-not-found" || getErr.code === "auth/invalid-credential") {
-          // Register new admin account in Firebase Authentication backend
-          const newFbUser = await adminAuth.createUser({
-            email: cleanEmail,
-            password: cleanPassword,
-            displayName: matchedAdmin.displayName,
-          });
-          uid = newFbUser.uid;
+        try {
+          const existingFbUser = await adminAuth.getUserByEmail(cleanEmail);
+          uid = existingFbUser.uid;
+        } catch (getErr: any) {
+          if (getErr.code === "auth/user-not-found" || getErr.code === "auth/invalid-credential") {
+            const newFbUser = await adminAuth.createUser({
+              email: cleanEmail,
+              password: cleanPassword,
+              displayName: matchedAdmin.displayName,
+            });
+            uid = newFbUser.uid;
+          }
         }
-      }
 
-      // Upsert admin profile in Firestore users collection
-      await adminDb
-        .collection("users")
-        .doc(uid)
-        .set(
-          {
-            uid,
-            email: cleanEmail,
-            displayName: matchedAdmin.displayName,
-            role: matchedAdmin.role,
-            division: matchedAdmin.division,
-            updatedAt: new Date().toISOString(),
-          },
-          { merge: true }
-        )
-        .catch((dbErr) => {
-          console.warn("Notice: Firestore adminDb sync:", dbErr.message);
-        });
-    } catch (adminErr: any) {
-      console.warn("Notice: Backend Firebase Admin auth sync:", adminErr.message);
+        await adminDb
+          .collection("users")
+          .doc(uid)
+          .set(
+            {
+              uid,
+              email: cleanEmail,
+              displayName: matchedAdmin.displayName,
+              role: matchedAdmin.role,
+              division: matchedAdmin.division,
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          )
+          .catch((dbErr) => {
+            console.warn("Notice: Firestore adminDb sync:", dbErr.message);
+          });
+      } catch (adminErr: any) {
+        console.warn("Notice: Backend Firebase Admin auth sync skipped:", adminErr.message);
+      }
     }
 
     const sessionData = {

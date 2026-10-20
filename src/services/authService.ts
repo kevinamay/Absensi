@@ -338,13 +338,28 @@ export const authService = {
     const normalizedEmail = email.trim().toLowerCase();
 
     // Call server-side admin login API route
-    const res = await fetch("/api/auth/admin-login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: normalizedEmail, password: pass }),
-    });
+    let res: Response;
+    try {
+      res = await fetch("/api/auth/admin-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: normalizedEmail, password: pass }),
+      });
+    } catch (fetchErr: any) {
+      throw new Error(
+        "Gagal menghubungi server autentikasi: " +
+          (fetchErr?.message || "Periksa koneksi internet Anda.")
+      );
+    }
 
-    const data = await res.json();
+    let data: any = {};
+    try {
+      const text = await res.text();
+      data = text ? JSON.parse(text) : {};
+    } catch (parseErr) {
+      throw new Error("Respon dari server tidak valid. Silakan coba kembali beberapa saat lagi.");
+    }
+
     if (!res.ok || !data.success) {
       throw new Error(data.error || "Email atau kata sandi administrator tidak valid.");
     }
