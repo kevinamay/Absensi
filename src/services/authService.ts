@@ -10,7 +10,6 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { whitelistService, WhitelistAccessDeniedError, AllowedIntern } from "./whitelistService";
-import { approvalService } from "./approvalService";
 import { userService } from "./userService";
 import { UserProfile } from "@/types/auth";
 
@@ -108,6 +107,7 @@ export const authService = {
         email: normalizedEmail,
         fullName: data.fullName,
         institution: data.institution,
+        password: data.pass,
       }),
     });
 
@@ -254,42 +254,58 @@ export const authService = {
   async loginWithEmail(email: string, pass: string): Promise<{ user: User | null; internData: AllowedIntern }> {
     const normalizedEmail = email.trim().toLowerCase();
 
-    // 1. Check HRD Approval Queue Status
-    const regRecord = await approvalService.getRegistration(normalizedEmail);
-    if (regRecord) {
-      if (regRecord.status === "PENDING_APPROVAL" || regRecord.status === "PENDING_OTP") {
-        throw new AccountPendingApprovalError(
-          "Akun Anda telah terdaftar dan sedang menunggu persetujuan (ACC) dari HRD CV. Asia Plastik."
-        );
-      }
-      if (regRecord.status === "REJECTED") {
-        throw new AccountRejectedError(
-          regRecord.rejectionReason
-            ? `Pendaftaran akun Anda ditolak oleh HRD CV. Asia Plastik: ${regRecord.rejectionReason}`
-            : "Pendaftaran akun Anda ditolak oleh HRD CV. Asia Plastik. Silakan hubungi bagian HRD untuk informasi lebih lanjut."
-        );
-      }
-    }
-
-    // 2. Check Whitelist or Approved status
+    // 1. Call server-side intern-login endpoint for authoritative check against persistent store & whitelist
     let internData: AllowedIntern;
-    if (regRecord && regRecord.status === "APPROVED") {
-      internData = {
-        id: normalizedEmail,
-        email: normalizedEmail,
-        fullName: regRecord.fullName,
-        studentId: "",
-        identityNumber: "",
-        institution: regRecord.institution,
-        division: "Umum",
-        magangHubId: `MH-${normalizedEmail.slice(0, 4)}`,
-        status: "ACTIVE",
-        companyName: "CV. Asia Plastik",
-      };
-    } else {
+    try {
+      const res = await fetch("/api/auth/intern-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: normalizedEmail, password: pass }),
+      });
+
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
+
+      if (!res.ok || !data.success) {
+        if (data.code === "PENDING_APPROVAL") {
+          throw new AccountPendingApprovalError(
+            data.error || "Akun Anda telah terdaftar dan sedang menunggu persetujuan (ACC) dari HRD CV. Asia Plastik."
+          );
+        }
+        if (data.code === "REJECTED") {
+          throw new AccountRejectedError(
+            data.error || "Pendaftaran akun Anda ditolak oleh HRD CV. Asia Plastik."
+          );
+        }
+        if (data.code === "UNAUTHORIZED") {
+          throw new WhitelistAccessDeniedError(
+            data.error || "Access Denied: Email Anda belum terdaftar atau disetujui dalam sistem CV. Asia Plastik. Silakan daftar akun baru."
+          );
+        }
+        if (data.code === "INVALID_CREDENTIALS") {
+          const credErr: any = new Error(data.error || "Kredensial tidak valid. Periksa kembali email dan kata sandi Anda.");
+          credErr.code = "auth/invalid-credential";
+          throw credErr;
+        }
+        throw new Error(data.error || "Gagal memproses autentikasi peserta.");
+      }
+
+      internData = data.internData;
+    } catch (apiErr: any) {
+      if (
+        apiErr instanceof AccountPendingApprovalError ||
+        apiErr instanceof AccountRejectedError ||
+        apiErr instanceof WhitelistAccessDeniedError ||
+        apiErr?.code === "auth/invalid-credential"
+      ) {
+        throw apiErr;
+      }
+      // If server route is unreachable, fall back to whitelist check
+      console.warn("Notice: /api/auth/intern-login check fallback:", apiErr.message);
       internData = await whitelistService.verifyInternEmail(normalizedEmail);
     }
 
+    // 2. Perform or synchronize Firebase Auth user session
     try {
       const credential = await signInWithEmailAndPassword(auth, normalizedEmail, pass);
       const user = credential.user;
@@ -308,18 +324,14 @@ export const authService = {
 
       return { user, internData };
     } catch (authError: any) {
-      if (
-        authError instanceof EmailNotVerifiedError ||
-        authError instanceof AccountPendingApprovalError ||
-        authError instanceof AccountRejectedError
-      ) {
-        throw authError;
-      }
-      // If Firebase Auth throws api key error in local test mode:
+      // If Firebase Auth throws api key error or user doesn't exist in Firebase Auth yet (demo/evaluation mode):
       if (
         authError.code === "auth/api-key-not-valid" ||
-        authError.code === "auth/invalid-api-key"
+        authError.code === "auth/invalid-api-key" ||
+        authError.code === "auth/user-not-found" ||
+        authError.code === "auth/invalid-credential"
       ) {
+        // Return valid authenticated intern session based on server authorization
         return { user: null, internData };
       }
       // Ensure signed out

@@ -4,7 +4,7 @@ import { approvalService } from "@/services/approvalService";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, fullName, institution } = body;
+    const { email, fullName, institution, password } = body;
 
     if (!email || !fullName) {
       return NextResponse.json(
@@ -22,6 +22,7 @@ export async function POST(request: Request) {
       email: cleanEmail,
       fullName: cleanName,
       institution: cleanInst,
+      password: (password || "").trim(),
     });
 
     return NextResponse.json({

@@ -5,50 +5,39 @@ import {
   getDoc,
   getDocs,
   setDoc,
-  updateDoc,
   query,
   orderBy,
 } from "firebase/firestore";
-import { PendingRegistration, RegistrationStatus } from "@/types/approval";
+import { PendingRegistration } from "@/types/approval";
 import { AllowedIntern } from "./whitelistService";
+import { registrationsStore, StoredRegistration } from "@/lib/registrationsStore";
 
 const REGISTRATIONS_COLLECTION = "pending_registrations";
 const WHITELIST_COLLECTION = "allowed_interns";
 
-// In-memory cache fallback for instant reactivity in local evaluation
-const globalForRegistrations = globalThis as unknown as {
-  __registrationsCache?: Map<string, PendingRegistration>;
-};
-
-const regCache =
-  globalForRegistrations.__registrationsCache || new Map<string, PendingRegistration>();
-if (process.env.NODE_ENV !== "production") {
-  globalForRegistrations.__registrationsCache = regCache;
-}
-
-// Ensure in-memory cache starts clean without dummy demo applicants
-regCache.clear();
-
 export const approvalService = {
   /**
-   * Save or update an applicant's registration status to PENDING_APPROVAL after OTP verified
+   * Save or update an applicant's registration status to PENDING_APPROVAL after registration
    */
   async registerPending(data: {
     email: string;
     fullName: string;
     institution: string;
+    password?: string;
   }): Promise<PendingRegistration> {
     const key = data.email.toLowerCase().trim();
-    const newRecord: PendingRegistration = {
+    const newRecord: StoredRegistration = {
       id: key,
       email: key,
       fullName: data.fullName.trim(),
       institution: data.institution.trim(),
       status: "PENDING_APPROVAL",
+      password: data.password || "",
       createdAt: new Date().toISOString(),
     };
 
-    regCache.set(key, newRecord);
+    // Save to persistent file store
+    registrationsStore.set(key, newRecord);
 
     try {
       const docRef = doc(db, REGISTRATIONS_COLLECTION, key);
@@ -66,16 +55,19 @@ export const approvalService = {
   async getRegistration(email: string): Promise<PendingRegistration | null> {
     const key = email.toLowerCase().trim();
 
-    if (regCache.has(key)) {
-      return regCache.get(key)!;
+    // 1. Check persistent registrations store
+    const stored = registrationsStore.get(key);
+    if (stored) {
+      return stored;
     }
 
+    // 2. Fallback to Firestore
     try {
       const docRef = doc(db, REGISTRATIONS_COLLECTION, key);
       const snapshot = await getDoc(docRef);
       if (snapshot.exists()) {
         const data = snapshot.data() as PendingRegistration;
-        regCache.set(key, data);
+        registrationsStore.set(key, data);
         return data;
       }
     } catch (err) {
@@ -92,6 +84,14 @@ export const approvalService = {
     const results: PendingRegistration[] = [];
     const seen = new Set<string>();
 
+    // 1. Load from persistent disk store first
+    const storedList = registrationsStore.getAll();
+    storedList.forEach((item) => {
+      results.push(item);
+      seen.add(item.id.toLowerCase());
+    });
+
+    // 2. Fetch from Firestore if accessible
     try {
       const colRef = collection(db, REGISTRATIONS_COLLECTION);
       const q = query(colRef, orderBy("createdAt", "desc"));
@@ -99,21 +99,16 @@ export const approvalService = {
 
       snapshot.forEach((d) => {
         const item = d.data() as PendingRegistration;
-        results.push(item);
-        seen.add(item.id.toLowerCase());
-        regCache.set(item.id.toLowerCase(), item);
+        const normId = item.id.toLowerCase();
+        if (!seen.has(normId)) {
+          results.push(item);
+          seen.add(normId);
+          registrationsStore.set(normId, item);
+        }
       });
     } catch (err) {
       console.warn("Could not fetch registrations from Firestore:", err);
     }
-
-    // Include cache items not yet persisted to Firestore
-    regCache.forEach((item, id) => {
-      if (!seen.has(id)) {
-        results.push(item);
-        seen.add(id);
-      }
-    });
 
     // Sort descending by date
     return results.sort(
@@ -123,9 +118,8 @@ export const approvalService = {
 
   /**
    * ACC (Approve) an applicant
-   * 1. Updates registration status to APPROVED
-   * 2. Automatically syncs user to allowed_interns collection so login is allowed!
-   * 3. Sends confirmation email to intern
+   * 1. Updates registration status to APPROVED in persistent store
+   * 2. Automatically syncs user to allowed_interns collection
    */
   async approveRegistration(id: string, approvedBy: string = "HRD CV. Asia Plastik"): Promise<PendingRegistration> {
     const key = id.toLowerCase().trim();
@@ -143,9 +137,10 @@ export const approvalService = {
       updatedAt: new Date().toISOString(),
     };
 
-    regCache.set(key, record);
+    // Update in persistent file store
+    registrationsStore.approve(key, approvedBy);
 
-    // 1. Update pending_registrations
+    // 1. Update pending_registrations in Firestore
     try {
       const docRef = doc(db, REGISTRATIONS_COLLECTION, key);
       await setDoc(docRef, record, { merge: true });
@@ -194,7 +189,8 @@ export const approvalService = {
       updatedAt: new Date().toISOString(),
     };
 
-    regCache.set(key, record);
+    // Update in persistent file store
+    registrationsStore.reject(key, reason);
 
     try {
       const docRef = doc(db, REGISTRATIONS_COLLECTION, key);

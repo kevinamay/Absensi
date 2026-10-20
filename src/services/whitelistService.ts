@@ -52,6 +52,18 @@ export const MOCK_WHITELIST_INTERNS: AllowedIntern[] = [
     status: "ACTIVE",
     companyName: "CV. Asia Plastik",
   },
+  {
+    id: "intern-kevinamay",
+    email: "kevinamay23@gmail.com",
+    fullName: "Kevina Maydiva Heriansaputri",
+    studentId: "21.11.0001",
+    identityNumber: "3515082109090009",
+    institution: "Universitas Teknologi Yogyakarta",
+    division: "Administrasi & Operasional",
+    magangHubId: "MH-2026-APL-023",
+    status: "ACTIVE",
+    companyName: "CV. Asia Plastik",
+  },
 ];
 
 const WHITELIST_COLLECTION = "allowed_interns";
