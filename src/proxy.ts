@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import type { SessionData } from "@/types/auth";
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -16,11 +17,11 @@ export function proxy(request: NextRequest) {
 
   // Extract session cookie (set upon successful Firestore whitelist verification)
   const sessionCookie = request.cookies.get("cv_asia_session")?.value;
-  let session: any = null;
+  let session: SessionData | null = null;
 
   if (sessionCookie) {
     try {
-      session = JSON.parse(decodeURIComponent(sessionCookie));
+      session = JSON.parse(decodeURIComponent(sessionCookie)) as SessionData;
     } catch (e) {
       // Cookie corrupted or invalid
       session = null;

@@ -1,6 +1,14 @@
+import type { Timestamp } from "firebase/firestore";
+
 export type AttendanceType = "CHECK_IN" | "CHECK_OUT";
 
 export type AttendanceStatus = "PRESENT" | "LATE" | "PERMISSION" | "SICK" | "ABSENT";
+
+export type AttendanceTimestamp =
+  | Timestamp
+  | Date
+  | string
+  | { seconds: number; nanoseconds: number };
 
 export interface GeoLocationCoordinates {
   latitude: number;
@@ -17,7 +25,7 @@ export interface AttendanceRecord {
   division?: string;
   type: AttendanceType;
   status: AttendanceStatus;
-  timestamp: any; // Firestore Timestamp
+  timestamp: AttendanceTimestamp;
   formattedDate: string; // YYYY-MM-DD
   formattedTime: string; // HH:mm:ss WIB
   location: GeoLocationCoordinates;

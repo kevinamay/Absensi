@@ -25,3 +25,12 @@ export interface AuthState {
   loading: boolean;
   error: string | null;
 }
+
+export interface SessionData {
+  uid?: string;
+  email: string;
+  displayName?: string;
+  role: UserRole;
+  whitelisted?: boolean;
+  expiresAt?: number;
+}
