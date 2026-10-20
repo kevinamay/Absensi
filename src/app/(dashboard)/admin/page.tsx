@@ -56,73 +56,12 @@ export default function AdminDashboard() {
     attendanceService
       .getAllRecentAttendance(100)
       .then((data) => {
-        if (data && data.length > 0) {
-          setRecords(data);
-        } else {
-          // Sample mock data for demonstration
-          const sampleMock: AttendanceRecord[] = [
-            {
-              id: "rec-1",
-              internId: "intern-1",
-              internName: "Ahmad Fauzi",
-              internStudentId: "2141720189",
-              institution: "Institut Teknologi Sepuluh Nopember (ITS)",
-              division: "Quality Control (QC)",
-              type: "CHECK_IN",
-              status: "PRESENT",
-              timestamp: new Date(),
-              formattedDate: new Date().toISOString().split("T")[0],
-              formattedTime: "07:48:12",
-              location: { latitude: -7.33612, longitude: 112.76116, accuracy: 4 },
-              distanceFromOfficeMeters: 18,
-              isWithinGeofence: true,
-              officeName: "Kantor 1 (PT. Asia Plastik)",
-              notes: "Inspeksi injection molding line 1",
-              createdAt: new Date().toISOString(),
-            },
-            {
-              id: "rec-2",
-              internId: "intern-2",
-              internName: "Siti Rahmawati",
-              internStudentId: "2021081023",
-              institution: "Politeknik Elektronika Negeri Surabaya (PENS)",
-              division: "Maintenance & Otomasi",
-              type: "CHECK_IN",
-              status: "PRESENT",
-              timestamp: new Date(),
-              formattedDate: new Date().toISOString().split("T")[0],
-              formattedTime: "07:55:30",
-              location: { latitude: -7.33529, longitude: 112.7565, accuracy: 6 },
-              distanceFromOfficeMeters: 25,
-              isWithinGeofence: true,
-              officeName: "Kantor 2 (CV. Asia Plastik)",
-              notes: "Pengecekan sensor suhu chiller pabrik",
-              createdAt: new Date().toISOString(),
-            },
-            {
-              id: "rec-3",
-              internId: "intern-3",
-              internName: "Dimas Wicaksono",
-              internStudentId: "1951502011",
-              institution: "Universitas Brawijaya",
-              division: "Produksi Blow Molding",
-              type: "CHECK_IN",
-              status: "LATE",
-              timestamp: new Date(),
-              formattedDate: new Date().toISOString().split("T")[0],
-              formattedTime: "08:24:10",
-              location: { latitude: -7.33535, longitude: 112.75655, accuracy: 5 },
-              distanceFromOfficeMeters: 40,
-              isWithinGeofence: true,
-              officeName: "Kantor 2 (CV. Asia Plastik)",
-              notes: "Kendala lalu lintas di bundaran Waru",
-              createdAt: new Date().toISOString(),
-            },
-          ];
-          setRecords(sampleMock);
-        }
+        setRecords(data || []);
       })
-      .catch((e) => console.warn("Failed to load records for admin:", e));
+      .catch((e) => {
+        console.warn("Failed to load records for admin:", e);
+        setRecords([]);
+      });
   }, []);
 
   // Load Registrations for Approval Queue

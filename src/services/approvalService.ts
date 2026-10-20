@@ -26,42 +26,8 @@ if (process.env.NODE_ENV !== "production") {
   globalForRegistrations.__registrationsCache = regCache;
 }
 
-// Initial demo seed for HRD approval testing if collection is brand new
-const INITIAL_DEMO_APPLICANTS: PendingRegistration[] = [
-  {
-    id: "kevin.magang@gmail.com",
-    email: "kevin.magang@gmail.com",
-    fullName: "Kevin Christian Amay",
-    institution: "Universitas Negeri Surabaya (UNESA)",
-    status: "PENDING_APPROVAL",
-    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-  },
-  {
-    id: "annisa.putri@kemnaker.maganghub.id",
-    email: "annisa.putri@kemnaker.maganghub.id",
-    fullName: "Annisa Larasati Putri",
-    institution: "Politeknik Perkapalan Negeri Surabaya (PPNS)",
-    status: "PENDING_APPROVAL",
-    createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-  },
-  {
-    id: "rizky.pratama@student.ub.ac.id",
-    email: "rizky.pratama@student.ub.ac.id",
-    fullName: "Rizky Aditya Pratama",
-    institution: "Universitas Brawijaya",
-    status: "APPROVED",
-    approvedAt: new Date(Date.now() - 86400000).toISOString(),
-    approvedBy: "Budi Santoso (HR Supervisor)",
-    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-  },
-];
-
-// Populate in-memory store initially if empty
-if (regCache.size === 0) {
-  INITIAL_DEMO_APPLICANTS.forEach((item) => {
-    regCache.set(item.id.toLowerCase(), item);
-  });
-}
+// Ensure in-memory cache starts clean without dummy demo applicants
+regCache.clear();
 
 export const approvalService = {
   /**
