@@ -310,7 +310,7 @@ export function VariantC({
                 onClick={() => setMainStatus("IZIN_DENGAN_KETERANGAN")}
                 className={`p-3.5 rounded-2xl border text-left transition-all ${
                   mainStatus === "IZIN_DENGAN_KETERANGAN"
-                    ? "bg-amber-600 text-white border-amber-600 shadow-lg shadow-amber-600/30 scale-102 ring-2 ring-amber-400"
+                    ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/30 scale-102 ring-2 ring-blue-400"
                     : "bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50"
                 }`}
               >
@@ -330,7 +330,7 @@ export function VariantC({
                 onClick={() => setMainStatus("IZIN_TANPA_KETERANGAN")}
                 className={`p-3.5 rounded-2xl border text-left transition-all ${
                   mainStatus === "IZIN_TANPA_KETERANGAN"
-                    ? "bg-rose-600 text-white border-rose-600 shadow-lg shadow-rose-600/30 scale-102 ring-2 ring-rose-400"
+                    ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/30 scale-102 ring-2 ring-blue-400"
                     : "bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50"
                 }`}
               >
@@ -381,7 +381,7 @@ export function VariantC({
 
           {/* Condition 2: IZIN DENGAN KETERANGAN */}
           {mainStatus === "IZIN_DENGAN_KETERANGAN" && (
-            <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 space-y-4 animate-in fade-in duration-200">
+            <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 space-y-4 animate-in fade-in duration-200">
               <div>
                 <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
                   Kategori Permohonan Izin
@@ -392,7 +392,7 @@ export function VariantC({
                     onClick={() => setPermissionCategory("IZIN")}
                     className={`py-2 px-3 rounded-xl text-xs font-bold transition-all ${
                       permissionCategory === "IZIN"
-                        ? "bg-amber-600 text-white shadow-xs"
+                        ? "bg-blue-600 text-white shadow-xs"
                         : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
                     }`}
                   >
@@ -403,7 +403,7 @@ export function VariantC({
                     onClick={() => setPermissionCategory("SAKIT")}
                     className={`py-2 px-3 rounded-xl text-xs font-bold transition-all ${
                       permissionCategory === "SAKIT"
-                        ? "bg-amber-600 text-white shadow-xs"
+                        ? "bg-blue-600 text-white shadow-xs"
                         : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
                     }`}
                   >
@@ -430,14 +430,14 @@ export function VariantC({
                   Bukti Foto Surat Izin Atasan / Dokter
                 </label>
                 {!proofPreview ? (
-                  <label className="border-2 border-dashed border-amber-300 dark:border-amber-800 hover:border-amber-500 rounded-2xl p-5 flex flex-col items-center justify-center cursor-pointer bg-white/70 dark:bg-slate-800/50 text-center">
-                    <Camera className="w-8 h-8 text-amber-600 mb-2" />
+                  <label className="border-2 border-dashed border-blue-300 dark:border-blue-800 hover:border-blue-500 rounded-2xl p-5 flex flex-col items-center justify-center cursor-pointer bg-white/70 dark:bg-slate-800/50 text-center">
+                    <Camera className="w-8 h-8 text-blue-600 mb-2" />
                     <span className="text-xs font-bold">Ambil Foto / Pilih Berkas</span>
                     <span className="text-[10px] text-slate-500 mt-0.5">Format JPG/PNG hingga 5MB</span>
                     <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                   </label>
                 ) : (
-                  <div className="flex items-center gap-3 p-2.5 rounded-2xl border border-amber-200 dark:border-amber-800 bg-white dark:bg-slate-800">
+                  <div className="flex items-center gap-3 p-2.5 rounded-2xl border border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-800">
                     <img src={proofPreview} alt="Bukti" className="w-16 h-16 object-cover rounded-xl" />
                     <div className="flex-1 min-w-0 text-xs">
                       <span className="font-bold truncate block">{proofFile?.name}</span>
@@ -454,7 +454,7 @@ export function VariantC({
 
           {/* Condition 3: IZIN TANPA KETERANGAN */}
           {mainStatus === "IZIN_TANPA_KETERANGAN" && (
-            <div className="p-4 rounded-2xl bg-rose-50/70 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 text-xs text-rose-900 dark:text-rose-200">
+            <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 text-xs text-blue-900 dark:text-blue-200">
               Permohonan akan langsung dikirim tanpa syarat dokumen lampiran.
             </div>
           )}
