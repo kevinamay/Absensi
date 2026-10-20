@@ -107,7 +107,11 @@ export const attendanceService = {
     const timeFormatted = formatIndonesianTime(now);
 
     let calculatedStatus: AttendanceStatus = "PRESENT";
-    if (payload.type === "CHECK_IN") {
+    if (payload.mainStatus === "IZIN_DENGAN_KETERANGAN") {
+      calculatedStatus = payload.permissionSubCategory === "SAKIT" ? "SICK" : "PERMISSION";
+    } else if (payload.mainStatus === "IZIN_TANPA_KETERANGAN") {
+      calculatedStatus = "ABSENT";
+    } else if (payload.type === "CHECK_IN") {
       calculatedStatus = evaluateAttendanceStatus(now);
     }
 
@@ -119,6 +123,12 @@ export const attendanceService = {
       division: internProfile.division || "Umum",
       type: payload.type,
       status: calculatedStatus,
+      mainStatus: payload.mainStatus || "HADIR",
+      permissionSubCategory: payload.permissionSubCategory || null,
+      checkInTime: payload.checkInTime || timeFormatted,
+      checkOutTime: payload.checkOutTime || null,
+      permissionReason: payload.permissionReason || "",
+      permissionProofUrl: payload.permissionProofUrl || payload.photoUrl || "",
       timestamp: serverTimestamp(),
       formattedDate: todayFormatted,
       formattedTime: timeFormatted,
@@ -129,10 +139,10 @@ export const attendanceService = {
       },
       distanceFromOfficeMeters: payload.distanceFromOfficeMeters,
       isWithinGeofence: payload.isWithinGeofence,
-      officeName: payload.officeName || (payload.isWithinGeofence ? "CV. Asia Plastik" : ""),
+      officeName: payload.officeName || (payload.isWithinGeofence ? "CV. Asia Plastik" : "Di Luar Area"),
       officeId: payload.officeId || "",
-      photoUrl: payload.photoUrl || "",
-      notes: payload.notes || "",
+      photoUrl: payload.permissionProofUrl || payload.photoUrl || "",
+      notes: payload.notes || payload.permissionReason || "",
       createdAt: now.toISOString(),
     };
 

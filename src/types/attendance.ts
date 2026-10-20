@@ -16,6 +16,13 @@ export interface GeoLocationCoordinates {
   accuracy: number;
 }
 
+export type MainAttendanceStatus =
+  | "HADIR"
+  | "IZIN_DENGAN_KETERANGAN"
+  | "IZIN_TANPA_KETERANGAN";
+
+export type PermissionSubCategory = "IZIN" | "SAKIT";
+
 export interface AttendanceRecord {
   id: string;
   internId: string;
@@ -25,6 +32,12 @@ export interface AttendanceRecord {
   division?: string;
   type: AttendanceType;
   status: AttendanceStatus;
+  mainStatus?: MainAttendanceStatus;
+  permissionSubCategory?: PermissionSubCategory;
+  checkInTime?: string;
+  checkOutTime?: string;
+  permissionReason?: string;
+  permissionProofUrl?: string;
   timestamp: AttendanceTimestamp;
   formattedDate: string; // YYYY-MM-DD
   formattedTime: string; // HH:mm:ss WIB
@@ -43,6 +56,12 @@ export interface CheckInPayload {
   coordinates: GeoLocationCoordinates;
   distanceFromOfficeMeters: number;
   isWithinGeofence: boolean;
+  mainStatus?: MainAttendanceStatus;
+  permissionSubCategory?: PermissionSubCategory;
+  checkInTime?: string;
+  checkOutTime?: string;
+  permissionReason?: string;
+  permissionProofUrl?: string;
   officeName?: string;
   officeId?: string;
   photoUrl?: string;
