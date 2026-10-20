@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { attendanceService } from "@/services/attendanceService";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -16,40 +15,10 @@ import {
   UserCheck,
 } from "lucide-react";
 
-import { VariantA } from "@/components/intern/VariantA";
-import { VariantB } from "@/components/intern/VariantB";
 import { VariantC } from "@/components/intern/VariantC";
-import {
-  PrototypeSwitcher,
-  PrototypeVariantInfo,
-} from "@/components/shared/PrototypeSwitcher";
-
-const PROTOTYPE_VARIANTS: PrototypeVariantInfo[] = [
-  {
-    key: "A",
-    name: "Command Center (Split Panel)",
-    description: "Panel terpisah form cerdas dinamis & radar GPS satelit kantor.",
-  },
-  {
-    key: "B",
-    name: "Progressive Stepper (Wizard)",
-    description: "Alur bertahap 3 langkah: Lokasi GPS -> Form & Bukti -> Konfirmasi.",
-  },
-  {
-    key: "C",
-    name: "Executive Glassmorphism (Mobile-First)",
-    description: "Kartu visual modern dengan Segmented Cards dan drag-and-drop lampiran.",
-  },
-];
 
 function InternDashboardContent() {
   const { user } = useAuth();
-  const searchParams = useSearchParams();
-
-  // Read current variant from URL search param (?variant=A | B | C)
-  const variantParam = (searchParams.get("variant") || "A").toUpperCase();
-  const validVariantKeys = ["A", "B", "C"];
-  const activeVariantKey = validVariantKeys.includes(variantParam) ? variantParam : "A";
 
   const [currentTime, setCurrentTime] = useState<string>("");
   const [currentDate, setCurrentDate] = useState<string>("");
@@ -82,37 +51,15 @@ function InternDashboardContent() {
   }, [user]);
 
   return (
-    <div className="space-y-8 pb-20">
-      {/* Dynamic Variant Rendering */}
-      {activeVariantKey === "A" && (
-        <VariantA
-          user={user}
-          currentTime={currentTime}
-          currentDate={currentDate}
-          records={records}
-          onAttendanceSubmitted={loadRecords}
-        />
-      )}
-
-      {activeVariantKey === "B" && (
-        <VariantB
-          user={user}
-          currentTime={currentTime}
-          currentDate={currentDate}
-          records={records}
-          onAttendanceSubmitted={loadRecords}
-        />
-      )}
-
-      {activeVariantKey === "C" && (
-        <VariantC
-          user={user}
-          currentTime={currentTime}
-          currentDate={currentDate}
-          records={records}
-          onAttendanceSubmitted={loadRecords}
-        />
-      )}
+    <div className="space-y-8 pb-12">
+      {/* Permanent Design C: Executive Glassmorphism */}
+      <VariantC
+        user={user}
+        currentTime={currentTime}
+        currentDate={currentDate}
+        records={records}
+        onAttendanceSubmitted={loadRecords}
+      />
 
       {/* Shared: Today's Attendance Log History */}
       <Card className="border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 shadow-md">
@@ -225,12 +172,6 @@ function InternDashboardContent() {
           )}
         </CardContent>
       </Card>
-
-      {/* Floating Prototype Switcher */}
-      <PrototypeSwitcher
-        variants={PROTOTYPE_VARIANTS}
-        currentVariant={activeVariantKey}
-      />
     </div>
   );
 }
