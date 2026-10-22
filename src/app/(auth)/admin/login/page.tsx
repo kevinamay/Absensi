@@ -21,7 +21,7 @@ import {
 
 function AdminLoginContent() {
   const router = useRouter();
-  const { loginAdmin } = useAuth();
+  const { loginAdmin, logout } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,13 +38,15 @@ function AdminLoginContent() {
         if (parsed.role !== "admin" && parsed.role !== "supervisor") {
           localStorage.removeItem("cv_asia_demo_user");
           document.cookie = "cv_asia_session=; path=/; max-age=0; SameSite=Lax";
+          logout().catch(() => {});
         }
       }
     } catch {
       localStorage.removeItem("cv_asia_demo_user");
       document.cookie = "cv_asia_session=; path=/; max-age=0; SameSite=Lax";
+      logout().catch(() => {});
     }
-  }, []);
+  }, [logout]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

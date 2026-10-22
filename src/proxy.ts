@@ -30,6 +30,11 @@ export function proxy(request: NextRequest) {
   const isProtectedIntern = pathname.startsWith("/intern") || pathname.startsWith("/dashboard");
   const isProtectedAdmin = pathname.startsWith("/admin") && pathname !== "/admin/login";
 
+  // 0. Root / always redirects immediately to /login so the landing page is strictly the Login portal
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
   // 1. Strict Route Protection for Intern Dashboard
   if (isProtectedIntern) {
     if (!session || !session.email || !session.whitelisted) {
@@ -46,8 +51,15 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // 3. Visiting /login: Always allow access to login page so users can log in or switch accounts
-
+  // 3. Visiting /login: Always allow access to login page and wipe session cookie so user gets a clean form
+  if (pathname === "/login") {
+    if (sessionCookie) {
+      const response = NextResponse.next();
+      response.cookies.delete("cv_asia_session");
+      return response;
+    }
+    return NextResponse.next();
+  }
 
   // 4. Visiting /admin/login
   if (pathname === "/admin/login") {
@@ -67,6 +79,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     "/intern/:path*",
     "/admin/:path*",
     "/dashboard/:path*",

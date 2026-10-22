@@ -30,7 +30,7 @@ import {
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -75,10 +75,11 @@ function LoginContent() {
     try {
       localStorage.removeItem("cv_asia_demo_user");
       document.cookie = "cv_asia_session=; path=/; max-age=0; SameSite=Lax";
+      logout().catch(() => {});
     } catch {
       // Ignore
     }
-  }, []);
+  }, [logout]);
 
   // Check if redirected with error from middleware or from registration
   useEffect(() => {
