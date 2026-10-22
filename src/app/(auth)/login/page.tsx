@@ -70,6 +70,16 @@ function LoginContent() {
     return () => clearInterval(interval);
   }, []);
 
+  // Reset any active session when visiting login page so the login form is always shown clean
+  useEffect(() => {
+    try {
+      localStorage.removeItem("cv_asia_demo_user");
+      document.cookie = "cv_asia_session=; path=/; max-age=0; SameSite=Lax";
+    } catch {
+      // Ignore
+    }
+  }, []);
+
   // Check if redirected with error from middleware or from registration
   useEffect(() => {
     if (searchParams.get("error") === "session_required") {

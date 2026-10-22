@@ -46,15 +46,8 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // 3. Redirect away from Login page if already authenticated with active whitelist session
-  if (pathname === "/login" && session?.email) {
-    if (session.role === "admin" || session.role === "supervisor") {
-      return NextResponse.redirect(new URL("/admin", request.url));
-    }
-    if (session.whitelisted) {
-      return NextResponse.redirect(new URL("/intern", request.url));
-    }
-  }
+  // 3. Visiting /login: Always allow access to login page so users can log in or switch accounts
+
 
   // 4. Visiting /admin/login
   if (pathname === "/admin/login") {

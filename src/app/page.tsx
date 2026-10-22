@@ -2,23 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.replace("/login");
-      } else if (user.role === "admin" || user.role === "supervisor") {
-        router.replace("/admin");
-      } else {
-        router.replace("/intern");
-      }
-    }
-  }, [user, loading, router]);
+    router.replace("/login");
+  }, [router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-400">
