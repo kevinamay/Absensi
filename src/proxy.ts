@@ -22,13 +22,11 @@ export function proxy(request: NextRequest) {
   if (sessionCookie) {
     try {
       session = JSON.parse(decodeURIComponent(sessionCookie)) as SessionData;
-    } catch (e) {
+    } catch {
       // Cookie corrupted or invalid
       session = null;
     }
   }
-
-  const isAuthPage = pathname === "/login" || pathname === "/admin/login";
   const isProtectedIntern = pathname.startsWith("/intern") || pathname.startsWith("/dashboard");
   const isProtectedAdmin = pathname.startsWith("/admin") && pathname !== "/admin/login";
 
@@ -49,12 +47,25 @@ export function proxy(request: NextRequest) {
   }
 
   // 3. Redirect away from Login page if already authenticated with active whitelist session
-  if (isAuthPage && session?.email) {
+  if (pathname === "/login" && session?.email) {
     if (session.role === "admin" || session.role === "supervisor") {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
     if (session.whitelisted) {
       return NextResponse.redirect(new URL("/intern", request.url));
+    }
+  }
+
+  // 4. Visiting /admin/login
+  if (pathname === "/admin/login") {
+    if (session?.email && (session.role === "admin" || session.role === "supervisor")) {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+    // If an intern session is active, automatically wipe the intern session cookie
+    if (session && session.role !== "admin" && session.role !== "supervisor") {
+      const response = NextResponse.next();
+      response.cookies.delete("cv_asia_session");
+      return response;
     }
   }
 

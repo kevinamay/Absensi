@@ -148,8 +148,8 @@ export function VariantA({
             mainStatus === "IZIN_DENGAN_KETERANGAN"
               ? permissionReason
               : mainStatus === "IZIN_TANPA_KETERANGAN"
-              ? "Izin tanpa keterangan tertulis"
-              : undefined,
+                ? "Izin tanpa keterangan tertulis"
+                : undefined,
           permissionProofUrl: proofPreview || undefined,
           notes:
             mainStatus === "HADIR"
@@ -162,8 +162,8 @@ export function VariantA({
         mainStatus === "HADIR"
           ? "Presensi kehadiran berhasil dikirim! Selamat bekerja dan belajar."
           : mainStatus === "IZIN_DENGAN_KETERANGAN"
-          ? `Permohonan ${permissionCategory === "SAKIT" ? "sakit" : "izin"} berhasil diserahkan ke HRD.`
-          : "Presensi izin tanpa keterangan telah dicatat ke sistem."
+            ? `Permohonan ${permissionCategory === "SAKIT" ? "sakit" : "izin"} berhasil diserahkan ke HRD.`
+            : "Presensi izin tanpa keterangan telah dicatat ke sistem."
       );
 
       // Reset form
@@ -515,11 +515,10 @@ export function VariantA({
                 {allOffices.map((office) => (
                   <div
                     key={office.id}
-                    className={`p-3 rounded-xl border transition-all ${
-                      office.isWithinGeofence
+                    className={`p-3 rounded-xl border transition-all ${office.isWithinGeofence
                         ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-950 dark:text-emerald-200"
                         : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-300"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,6 +28,23 @@ function AdminLoginContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Automatically clear intern session when accessing supervisor login page
+  useEffect(() => {
+    try {
+      const savedSession = localStorage.getItem("cv_asia_demo_user");
+      if (savedSession) {
+        const parsed = JSON.parse(savedSession);
+        if (parsed.role !== "admin" && parsed.role !== "supervisor") {
+          localStorage.removeItem("cv_asia_demo_user");
+          document.cookie = "cv_asia_session=; path=/; max-age=0; SameSite=Lax";
+        }
+      }
+    } catch {
+      localStorage.removeItem("cv_asia_demo_user");
+      document.cookie = "cv_asia_session=; path=/; max-age=0; SameSite=Lax";
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
