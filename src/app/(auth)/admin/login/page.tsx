@@ -29,24 +29,27 @@ function AdminLoginContent() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Automatically clear intern session when accessing supervisor login page
+  const hasCleanedUpRef = React.useRef(false);
+
+  // Automatically clear intern session once when accessing supervisor login page
   useEffect(() => {
-    try {
-      const savedSession = localStorage.getItem("cv_asia_demo_user");
-      if (savedSession) {
-        const parsed = JSON.parse(savedSession);
-        if (parsed.role !== "admin" && parsed.role !== "supervisor") {
-          localStorage.removeItem("cv_asia_demo_user");
-          document.cookie = "cv_asia_session=; path=/; max-age=0; SameSite=Lax";
-          logout().catch(() => {});
+    if (!hasCleanedUpRef.current) {
+      hasCleanedUpRef.current = true;
+      try {
+        const savedSession = localStorage.getItem("cv_asia_demo_user");
+        if (savedSession) {
+          const parsed = JSON.parse(savedSession);
+          if (parsed.role !== "admin" && parsed.role !== "supervisor") {
+            localStorage.removeItem("cv_asia_demo_user");
+            document.cookie = "cv_asia_session=; path=/; max-age=0; SameSite=Lax";
+          }
         }
+      } catch {
+        localStorage.removeItem("cv_asia_demo_user");
+        document.cookie = "cv_asia_session=; path=/; max-age=0; SameSite=Lax";
       }
-    } catch {
-      localStorage.removeItem("cv_asia_demo_user");
-      document.cookie = "cv_asia_session=; path=/; max-age=0; SameSite=Lax";
-      logout().catch(() => {});
     }
-  }, [logout]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,14 +63,14 @@ function AdminLoginContent() {
     setSubmitting(true);
     try {
       await loginAdmin(email, password);
-      router.push("/admin");
+      // Hard navigation to /admin ensures clean synchronization of admin session
+      window.location.href = "/admin";
     } catch (err: any) {
+      setSubmitting(false);
       console.warn("Direct HRD Admin login error:", err);
       setErrorMessage(
         err.message || "Email atau kata sandi administrator salah. Pastikan kredensial benar."
       );
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -204,9 +207,10 @@ function AdminLoginContent() {
               variant="primary"
               className="w-full py-3.5 bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 hover:from-blue-600 hover:to-indigo-500 text-white font-black rounded-xl shadow-xl shadow-blue-700/25 border border-blue-400/20 cursor-pointer"
               isLoading={submitting}
+              disabled={submitting}
             >
-              <Lock className="w-4 h-4 mr-2" />
-              Buka Konsol Monitoring HR
+              {!submitting && <Lock className="w-4 h-4 mr-2" />}
+              {submitting ? "Memverifikasi Supervisor..." : "Buka Konsol Monitoring HR"}
             </Button>
           </form>
 

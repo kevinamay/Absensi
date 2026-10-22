@@ -53,6 +53,8 @@ function LoginContent() {
     refreshLocation,
   } = useGeolocation();
 
+  const hasCleanedUpRef = React.useRef(false);
+
   // Live WIB Clock
   useEffect(() => {
     const updateTime = () => {
@@ -70,16 +72,18 @@ function LoginContent() {
     return () => clearInterval(interval);
   }, []);
 
-  // Reset any active session when visiting login page so the login form is always shown clean
+  // Reset any active session ONLY ONCE when first landing on login page
   useEffect(() => {
-    try {
-      localStorage.removeItem("cv_asia_demo_user");
-      document.cookie = "cv_asia_session=; path=/; max-age=0; SameSite=Lax";
-      logout().catch(() => {});
-    } catch {
-      // Ignore
+    if (!hasCleanedUpRef.current) {
+      hasCleanedUpRef.current = true;
+      try {
+        localStorage.removeItem("cv_asia_demo_user");
+        document.cookie = "cv_asia_session=; path=/; max-age=0; SameSite=Lax";
+      } catch {
+        // Ignore
+      }
     }
-  }, [logout]);
+  }, []);
 
   // Check if redirected with error from middleware or from registration
   useEffect(() => {
@@ -112,7 +116,8 @@ function LoginContent() {
     setSubmitting(true);
     try {
       await login(normalizedEmail, password);
-      router.push("/intern");
+      // Hard navigation to /intern ensures full synchronization of new session cookies
+      window.location.href = "/intern";
     } catch (err: any) {
       console.warn("Login verification result:", err);
       if (
@@ -383,12 +388,12 @@ function LoginContent() {
 
             <Button
               type="submit"
-              className="w-full py-3.5 font-bold mt-2 bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white shadow-xl shadow-blue-900/30 border border-blue-400/30 rounded-xl"
+              className="w-full py-3.5 font-bold mt-2 bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white shadow-xl shadow-blue-900/30 border border-blue-400/30 rounded-xl cursor-pointer"
               isLoading={submitting}
               disabled={submitting}
             >
-              <Lock className="w-4 h-4 mr-2" />
-              Masuk ke Portal Presensi
+              {!submitting && <Lock className="w-4 h-4 mr-2" />}
+              {submitting ? "Memverifikasi Presensi..." : "Masuk ke Portal Presensi"}
             </Button>
 
             {/* Registration activation button */}

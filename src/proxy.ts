@@ -51,13 +51,8 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // 3. Visiting /login: Always allow access to login page and wipe session cookie so user gets a clean form
+  // 3. Visiting /login: Always allow access to login page so users can log in or switch accounts
   if (pathname === "/login") {
-    if (sessionCookie) {
-      const response = NextResponse.next();
-      response.cookies.delete("cv_asia_session");
-      return response;
-    }
     return NextResponse.next();
   }
 
