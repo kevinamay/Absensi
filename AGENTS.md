@@ -7,3 +7,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Repository & Git Rules
+- Setiap kali ada perubahan kode atau perbaikan yang selesai dikerjakan dan diverifikasi, **WAJIB** selalu di-commit dan di-push ke repository: `https://github.com/kevinamay/Absensi` (`origin main`).
