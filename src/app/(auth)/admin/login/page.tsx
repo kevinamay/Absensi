@@ -12,7 +12,6 @@ import {
   Lock,
   Mail,
   AlertCircle,
-  ArrowLeft,
   Eye,
   EyeOff,
   Shield,
@@ -213,16 +212,6 @@ function AdminLoginContent() {
               {submitting ? "Memverifikasi Supervisor..." : "Buka Konsol Monitoring HR"}
             </Button>
           </form>
-
-          {/* Back to Intern Login Link */}
-          <div className="mt-5 pt-4 text-center border-t border-slate-200 dark:border-white/10">
-            <Link
-              href="/login"
-              className="text-xs font-semibold text-blue-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" /> Kembali ke Portal Siswa Magang
-            </Link>
-          </div>
         </div>
 
         {/* Subtitle Footer info */}
