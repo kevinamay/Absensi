@@ -239,7 +239,7 @@ function VerifyOtpContent() {
 
       {/* Floating Corporate Identity Header on Top Left */}
       <div className="absolute top-6 left-6 z-30">
-        <Link href="/" className="flex items-center gap-3.5 group">
+        <Link href="/" className="flex items-center group">
           <Image
             src="/images/logo.webp"
             alt="CV. Asia Plastik Logo"
@@ -248,11 +248,6 @@ function VerifyOtpContent() {
             priority
             className="h-10 sm:h-12 w-auto object-contain transition-all group-hover:opacity-90 filter brightness-0 dark:brightness-100 drop-shadow-sm opacity-90 dark:opacity-100"
           />
-          <div className="hidden sm:block border-l border-slate-300 dark:border-white/20 pl-3 py-0.5 transition-colors">
-            <span className="text-sm font-black tracking-tight block text-slate-900 dark:text-white transition-colors">
-              CV. ASIA PLASTIK
-            </span>
-          </div>
         </Link>
       </div>
 
