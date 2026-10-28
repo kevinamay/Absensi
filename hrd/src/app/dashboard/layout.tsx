@@ -1,21 +1,38 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { PrototypeSwitcher, PrototypeVariantInfo } from "@/components/shared/PrototypeSwitcher";
 import { LogOut, Shield } from "lucide-react";
 
-export default function HrdDashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export const PROTOTYPE_VARIANTS: PrototypeVariantInfo[] = [
+  {
+    key: "A",
+    name: "Varian A: Vivid Azure Horizon",
+    description: "Gradasi biru langit tebal & kaskade atmosferik dari atas ke bawah",
+  },
+  {
+    key: "B",
+    name: "Varian B: Radiant Cyber Mesh",
+    description: "Sinar diagonal biru elektrik dengan matriks pola titik presisi",
+  },
+  {
+    key: "C",
+    name: "Varian C: Intense Dual Aurora",
+    description: "Dua bola aurora cair cyan & sapphire yang tebal dan menyala jelas",
+  },
+];
+
+function HrdDashboardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, logout, loading } = useAuth();
+  const currentVariant = searchParams.get("variant") || "A";
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) {
@@ -24,29 +41,51 @@ export default function HrdDashboardLayout({
   }, [user, loading, router]);
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden bg-[#f0f6fc] dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-300">
-      {/* Modern Aesthetic White & Soft Light Blue Gradient Background with Organic Floating Aurora Blobs */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[#f8fbff] via-[#eef6ff] to-[#e6f2fe] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pointer-events-none overflow-hidden transition-colors duration-500">
-        {/* Floating Aurora Blob 1 (Top-Right) */}
-        <div className="absolute -top-24 -right-24 w-[36rem] h-[36rem] rounded-full bg-gradient-to-br from-sky-300/45 to-cyan-200/35 blur-3xl pointer-events-none dark:from-sky-900/25 dark:to-cyan-950/20" />
-        {/* Floating Aurora Blob 2 (Bottom-Left) */}
-        <div className="absolute -bottom-32 -left-32 w-[42rem] h-[42rem] rounded-full bg-gradient-to-tr from-blue-300/35 via-sky-200/45 to-indigo-200/25 blur-3xl pointer-events-none dark:from-blue-950/35 dark:via-sky-950/25" />
-        {/* Floating Aurora Blob 3 (Top-Center / Mid-Right) */}
-        <div className="absolute top-1/4 left-1/3 w-[30rem] h-[30rem] rounded-full bg-gradient-to-b from-cyan-200/25 to-sky-100/40 blur-2xl pointer-events-none dark:from-cyan-950/15" />
-        {/* Subtle Decorative Precision Dot Matrix for Tech Atmosphere */}
-        <div
-          className="absolute inset-0 opacity-30 dark:opacity-15 pointer-events-none"
-          style={{
-            backgroundImage: "radial-gradient(#0284c7 0.8px, transparent 0.8px)",
-            backgroundSize: "28px 28px",
-            maskImage: "radial-gradient(ellipse at 50% 50%, black 60%, transparent 95%)",
-            WebkitMaskImage: "radial-gradient(ellipse at 50% 50%, black 60%, transparent 95%)",
-          }}
-        />
-      </div>
+    <div className="min-h-screen relative overflow-x-hidden text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-300">
+      {/* ============================================================== */}
+      {/* PROTOTYPE VARIANT A: Vivid Azure Horizon                       */}
+      {/* ============================================================== */}
+      {currentVariant === "A" && (
+        <div className="fixed inset-0 -z-10 bg-gradient-to-b from-sky-200/95 via-blue-100/75 to-[#f0f7ff] dark:from-slate-950 dark:via-slate-900 dark:to-blue-950/40 pointer-events-none overflow-hidden transition-colors duration-500">
+          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[70rem] h-[35rem] rounded-full bg-gradient-to-b from-sky-400/45 via-cyan-300/35 to-transparent blur-3xl pointer-events-none dark:from-sky-800/30 dark:via-cyan-900/20" />
+          <div className="absolute top-1/4 -right-20 w-[40rem] h-[40rem] rounded-full bg-gradient-to-bl from-blue-400/40 via-sky-200/40 to-transparent blur-3xl pointer-events-none dark:from-blue-900/30" />
+          <div className="absolute -bottom-24 left-1/4 w-[50rem] h-[30rem] rounded-full bg-gradient-to-t from-sky-300/35 via-indigo-200/25 to-transparent blur-3xl pointer-events-none dark:from-sky-950/30" />
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* PROTOTYPE VARIANT B: Radiant Cyber Mesh                        */}
+      {/* ============================================================== */}
+      {currentVariant === "B" && (
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[#dbeafe] via-[#e0f2fe] to-[#f0f9ff] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pointer-events-none overflow-hidden transition-colors duration-500">
+          <div className="absolute -top-32 right-[-10%] w-[60rem] h-64 bg-gradient-to-r from-transparent via-sky-400/35 to-transparent -rotate-12 blur-2xl pointer-events-none" />
+          <div className="absolute top-1/2 -left-20 w-[55rem] h-52 bg-gradient-to-r from-transparent via-blue-400/30 to-transparent -rotate-12 blur-2xl pointer-events-none" />
+          <div className="absolute bottom-10 -left-20 w-[45rem] h-[45rem] rounded-full bg-gradient-to-tr from-blue-400/45 via-sky-300/50 to-transparent blur-3xl pointer-events-none dark:from-blue-950/40" />
+          <div
+            className="absolute inset-0 opacity-50 dark:opacity-20 pointer-events-none"
+            style={{
+              backgroundImage: "radial-gradient(#0284c7 1.2px, transparent 1.2px)",
+              backgroundSize: "24px 24px",
+              maskImage: "radial-gradient(ellipse at 50% 50%, black 70%, transparent 95%)",
+              WebkitMaskImage: "radial-gradient(ellipse at 50% 50%, black 70%, transparent 95%)",
+            }}
+          />
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* PROTOTYPE VARIANT C: Intense Dual Aurora                       */}
+      {/* ============================================================== */}
+      {currentVariant === "C" && (
+        <div className="fixed inset-0 -z-10 bg-gradient-to-tr from-[#e0f2fe] via-[#e6f4ff] to-[#bae6fd]/60 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pointer-events-none overflow-hidden transition-colors duration-500">
+          <div className="absolute -top-28 -right-28 w-[45rem] h-[45rem] rounded-full bg-gradient-to-br from-sky-400/60 via-cyan-300/50 to-blue-200/30 blur-3xl pointer-events-none animate-pulse dark:from-sky-700/40 dark:via-cyan-800/30" />
+          <div className="absolute -bottom-36 -left-36 w-[50rem] h-[50rem] rounded-full bg-gradient-to-tr from-blue-500/50 via-sky-400/60 to-indigo-300/40 blur-3xl pointer-events-none dark:from-blue-900/45 dark:via-sky-950/40" />
+          <div className="absolute top-1/3 left-1/4 w-[36rem] h-[36rem] rounded-full bg-gradient-to-b from-cyan-300/40 to-sky-200/50 blur-2xl pointer-events-none dark:from-cyan-900/25" />
+        </div>
+      )}
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 border-b border-sky-100/80 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xs transition-colors duration-200">
+      <header className="sticky top-0 z-40 border-b border-white/60 dark:border-slate-800 bg-white/75 dark:bg-slate-900/75 backdrop-blur-xl shadow-xs transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
@@ -122,9 +161,29 @@ export default function HrdDashboardLayout({
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-sky-100 dark:border-slate-900 bg-white/40 dark:bg-slate-950/80 backdrop-blur-md py-4 text-center text-xs text-slate-500 dark:text-slate-500">
+      <footer className="border-t border-sky-100/80 dark:border-slate-900 bg-white/40 dark:bg-slate-950/80 backdrop-blur-md py-4 text-center text-xs text-slate-500 dark:text-slate-500">
         CV. Asia Plastik HR Management Console • Dedicated Portal
       </footer>
+
+      {/* Floating Interactive Prototype Switcher Bar */}
+      <PrototypeSwitcher
+        variants={PROTOTYPE_VARIANTS}
+        currentVariant={currentVariant}
+      />
     </div>
+  );
+}
+
+export default function HrdDashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
+          <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <HrdDashboardContent>{children}</HrdDashboardContent>
+    </Suspense>
   );
 }
