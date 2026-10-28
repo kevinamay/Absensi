@@ -94,13 +94,13 @@ export function PrototypeSwitcher({
               key={v.key}
               type="button"
               onClick={() => setVariant(v.key)}
-              className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all ${
+              className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 v.key === activeVariant.key
                   ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 scale-105"
                   : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
               }`}
             >
-              Varian {v.key}
+              {v.key.toLowerCase() === "original" ? "Original" : `Varian ${v.key}`}
             </button>
           ))}
         </div>

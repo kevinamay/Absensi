@@ -27,10 +27,51 @@ import {
   RefreshCw,
 } from "lucide-react";
 
+// Three variants of the login background, switchable via ?variant=, on the existing /login route.
+import {
+  PrototypeSwitcher,
+  PrototypeVariantInfo,
+} from "@/components/shared/PrototypeSwitcher";
+
+const PROTOTYPE_VARIANTS: PrototypeVariantInfo[] = [
+  {
+    key: "A",
+    name: "Soft Ambient Aura",
+    description: "Putih bersih dengan pendaran cahaya radial biru muda halus & ambient studio modern",
+  },
+  {
+    key: "B",
+    name: "Precision Grid & Horizon",
+    description: "Gradasi diagonal biru muda dengan tekstur mikro-grid presisi industrial & accent bar",
+  },
+  {
+    key: "C",
+    name: "Floating Fluid Aurora",
+    description: "Kanvas putih dengan blob gradasi biru muda organik bernyawa & neo-glassmorphism",
+  },
+  {
+    key: "original",
+    name: "Foto Gedung (Lama)",
+    description: "Tampilan awal dengan foto gedung pabrik CV. Asia Plastik",
+  },
+];
+
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, logout } = useAuth();
+
+  // Read current prototype variant from URL query param (?variant=A|B|C|original)
+  const rawVariant = searchParams.get("variant")?.toLowerCase();
+  const currentVariant =
+    rawVariant === "b"
+      ? "B"
+      : rawVariant === "c"
+      ? "C"
+      : rawVariant === "original"
+      ? "original"
+      : "A";
+  const isOriginal = currentVariant === "original";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -168,29 +209,75 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center p-4 sm:p-8 lg:p-12 transition-colors duration-300">
-      {/* ============================================================== */}
-      {/* FULL-SCREEN REAL BUILDING BACKGROUND: BG_CV ASIA.webp (4K HD)  */}
-      {/* ============================================================== */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/images/BG_CV ASIA.webp"
-          alt="Gedung CV. Asia Plastik Sidoarjo"
-          fill
-          priority
-          unoptimized
-          quality={100}
-          className="object-cover object-center filter contrast-[1.03] brightness-100 dark:brightness-85 transition-all duration-300"
-        />
-        {/* Crisp Contrast Overlay without Blurring the Background Image */}
-        <div className="absolute inset-0 bg-slate-950/20 dark:bg-slate-950/60 transition-colors duration-300" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-slate-950/30" />
-      </div>
+    <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center p-4 sm:p-8 lg:p-12 transition-colors duration-300 select-none">
+      {/* ========================================================= */}
+      {/* BACKGROUND LAYER SELECTION ACCORDING TO PROTOTYPE VARIANT */}
+      {/* ========================================================= */}
+      {isOriginal && (
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/BG_CV ASIA.webp"
+            alt="Gedung CV. Asia Plastik Sidoarjo"
+            fill
+            priority
+            unoptimized
+            quality={100}
+            className="object-cover object-center filter contrast-[1.03] brightness-100 dark:brightness-85 transition-all duration-300"
+          />
+          <div className="absolute inset-0 bg-slate-950/20 dark:bg-slate-950/60 transition-colors duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-slate-950/30" />
+        </div>
+      )}
+
+      {currentVariant === "A" && (
+        /* Variant A: Soft Ambient Aura (Pure White with Diffused Radial Sky Blue Orbs) */
+        <div className="absolute inset-0 z-0 bg-white dark:bg-slate-950 overflow-hidden transition-colors duration-500">
+          {/* Top-Left Ambient Azure Glow */}
+          <div className="absolute -top-32 -left-32 w-[42rem] h-[42rem] rounded-full bg-gradient-to-br from-sky-200/70 via-blue-100/40 to-transparent blur-3xl pointer-events-none dark:from-sky-900/30 dark:via-blue-950/20" />
+          {/* Bottom-Right Soft Cyan/Sky Radial Glow */}
+          <div className="absolute -bottom-36 -right-36 w-[45rem] h-[45rem] rounded-full bg-gradient-to-tl from-sky-200/80 via-cyan-100/50 to-transparent blur-3xl pointer-events-none dark:from-blue-900/30 dark:via-cyan-950/20" />
+          {/* Centered Soft Halo behind card */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[36rem] h-[36rem] rounded-full bg-sky-100/50 blur-3xl pointer-events-none dark:bg-sky-950/40" />
+          {/* Subtle Aesthetic Vignette */}
+          <div className="absolute inset-0 bg-radial from-transparent via-transparent to-sky-100/25 dark:to-slate-950/60 pointer-events-none" />
+        </div>
+      )}
+
+      {currentVariant === "B" && (
+        /* Variant B: Precision Grid & Horizon (Diagonal Blue-White Wash + Micro Dot Matrix) */
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-white via-sky-50/80 to-blue-100/60 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950/40 overflow-hidden transition-colors duration-500">
+          {/* Precision Micro-dot matrix pattern */}
+          <div
+            className="absolute inset-0 opacity-40 dark:opacity-20 pointer-events-none"
+            style={{
+              backgroundImage: "radial-gradient(#0284c7 0.9px, transparent 0.9px)",
+              backgroundSize: "24px 24px",
+              maskImage: "radial-gradient(ellipse at 50% 50%, black 50%, transparent 85%)",
+              WebkitMaskImage: "radial-gradient(ellipse at 50% 50%, black 50%, transparent 85%)",
+            }}
+          />
+          {/* Crisp Geometric Diagonal Accents */}
+          <div className="absolute -top-40 right-0 w-[50rem] h-48 bg-gradient-to-r from-transparent via-sky-300/20 to-transparent -rotate-12 pointer-events-none" />
+          <div className="absolute bottom-10 -left-20 w-[45rem] h-36 bg-gradient-to-r from-transparent via-blue-300/15 to-transparent -rotate-12 pointer-events-none" />
+        </div>
+      )}
+
+      {currentVariant === "C" && (
+        /* Variant C: Floating Fluid Aurora (Organically Animated Light Blue Blobs) */
+        <div className="absolute inset-0 z-0 bg-[#f8fbff] dark:bg-slate-950 overflow-hidden transition-colors duration-500">
+          {/* Floating Aurora Blob 1 (Top-Right) */}
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-gradient-to-br from-sky-300/50 to-cyan-200/40 blur-3xl animate-pulse pointer-events-none dark:from-sky-900/30 dark:to-cyan-950/20" />
+          {/* Floating Aurora Blob 2 (Bottom-Left) */}
+          <div className="absolute -bottom-28 -left-28 w-[34rem] h-[34rem] rounded-full bg-gradient-to-tr from-blue-300/40 via-sky-200/50 to-indigo-200/30 blur-3xl pointer-events-none dark:from-blue-950/40 dark:via-sky-950/30" />
+          {/* Floating Aurora Blob 3 (Top-Center) */}
+          <div className="absolute top-1/4 left-1/3 w-80 h-80 rounded-full bg-gradient-to-b from-cyan-200/30 to-sky-100/50 blur-2xl pointer-events-none dark:from-cyan-950/20" />
+        </div>
+      )}
 
       {/* Floating Theme Toggle at Top Right */}
       <ThemeToggle />
 
-      {/* Floating Corporate Identity Header on Top Left (Clean Transparent Logo, No Background Box) */}
+      {/* Floating Corporate Identity Header on Top Left */}
       <div className="absolute top-6 left-6 z-20">
         <Link href="/" className="flex items-center gap-3.5 group">
           <Image
@@ -199,10 +286,26 @@ function LoginContent() {
             width={271}
             height={92}
             priority
-            className="h-10 sm:h-12 w-auto object-contain filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] group-hover:opacity-90 transition-opacity"
+            className={`h-10 sm:h-12 w-auto object-contain transition-all group-hover:opacity-90 ${
+              isOriginal
+                ? "filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]"
+                : "filter brightness-0 dark:brightness-100 drop-shadow-sm opacity-90 dark:opacity-100"
+            }`}
           />
-          <div className="hidden sm:block border-l border-white/25 pl-3 py-0.5">
-            <span className="text-sm font-black tracking-tight block text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+          <div
+            className={`hidden sm:block border-l pl-3 py-0.5 transition-colors ${
+              isOriginal
+                ? "border-white/25"
+                : "border-slate-300 dark:border-white/20"
+            }`}
+          >
+            <span
+              className={`text-sm font-black tracking-tight block transition-colors ${
+                isOriginal
+                  ? "text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]"
+                  : "text-slate-900 dark:text-white"
+              }`}
+            >
               CV. ASIA PLASTIK
             </span>
           </div>
@@ -411,19 +514,35 @@ function LoginContent() {
 
         {/* Subtitle / Footer info */}
         <div className="mt-4 text-center">
-          <p className="text-[11px] text-white/80 drop-shadow">
+          <p
+            className={`text-[11px] transition-colors ${
+              isOriginal
+                ? "text-white/80 drop-shadow"
+                : "text-slate-500 dark:text-slate-400 font-medium"
+            }`}
+          >
             CV. Asia Plastik • Gedung & Pabrik Injection Moulding Sidoarjo
           </p>
           <div className="mt-1">
             <a
               href={process.env.NEXT_PUBLIC_HRD_PORTAL_URL || "/admin/login"}
-              className="text-[11px] text-white/60 hover:text-white underline transition-colors"
+              className={`text-[11px] underline transition-colors ${
+                isOriginal
+                  ? "text-white/60 hover:text-white"
+                  : "text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-cyan-400"
+              }`}
             >
               Akses Khusus Portal HRD & Supervisor →
             </a>
           </div>
         </div>
       </div>
+
+      {/* Floating Interactive Prototype Switcher Bar at Bottom */}
+      <PrototypeSwitcher
+        variants={PROTOTYPE_VARIANTS}
+        currentVariant={currentVariant}
+      />
     </div>
   );
 }
