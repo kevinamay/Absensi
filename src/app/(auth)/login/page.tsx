@@ -409,14 +409,6 @@ function LoginContent() {
           <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium transition-colors">
             CV. Asia Plastik • Gedung & Pabrik Injection Moulding Sidoarjo
           </p>
-          <div className="mt-1">
-            <a
-              href={process.env.NEXT_PUBLIC_HRD_PORTAL_URL || "/admin/login"}
-              className="text-[11px] underline transition-colors text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-cyan-400"
-            >
-              Akses Khusus Portal HRD & Supervisor →
-            </a>
-          </div>
         </div>
       </div>
     </div>
