@@ -239,7 +239,7 @@ export default function AdminDashboard() {
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* KPI Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-5 shadow-sm">
+            <Card className="border border-white/80 dark:border-white/10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-5 shadow-lg shadow-sky-950/5 rounded-2xl transition-all hover:shadow-xl hover:shadow-sky-500/10">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Total Kehadiran Hari Ini
@@ -256,7 +256,7 @@ export default function AdminDashboard() {
               </div>
             </Card>
 
-            <Card className="border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-5 shadow-sm">
+            <Card className="border border-white/80 dark:border-white/10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-5 shadow-lg shadow-sky-950/5 rounded-2xl transition-all hover:shadow-xl hover:shadow-sky-500/10">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Tepat Waktu (On Time)
@@ -273,7 +273,7 @@ export default function AdminDashboard() {
               </div>
             </Card>
 
-            <Card className="border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-5 shadow-sm">
+            <Card className="border border-white/80 dark:border-white/10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-5 shadow-lg shadow-sky-950/5 rounded-2xl transition-all hover:shadow-xl hover:shadow-sky-500/10">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Terlambat
@@ -292,7 +292,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Table Container */}
-          <Card className="border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 shadow-sm">
+          <Card className="border border-white/80 dark:border-white/10 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl shadow-xl shadow-sky-950/5 rounded-2xl overflow-hidden">
             <CardHeader className="border-b border-slate-200 dark:border-slate-800/80 pb-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
@@ -507,7 +507,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Table Container for HRD Approvals */}
-          <Card className="border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 shadow-sm">
+          <Card className="border border-white/80 dark:border-white/10 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl shadow-xl shadow-sky-950/5 rounded-2xl overflow-hidden">
             <CardHeader className="border-b border-slate-200 dark:border-slate-800/80 pb-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
