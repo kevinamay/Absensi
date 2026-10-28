@@ -95,9 +95,10 @@ export default function HrdDashboardLayout({
               <p className="text-xs font-semibold">Memuat Dasbor HRD...</p>
             </div>
           </div>
-        ) : (
-          children
-        )}
+        ) : null}
+        <div className={loading ? "hidden" : "contents"}>
+          {children}
+        </div>
       </main>
 
       {/* Footer */}

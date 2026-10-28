@@ -107,9 +107,10 @@ export default function DashboardLayout({
               <p className="text-xs font-semibold">Memuat Sistem CV. Asia Plastik...</p>
             </div>
           </div>
-        ) : (
-          children
-        )}
+        ) : null}
+        <div className={loading ? "hidden" : "contents"}>
+          {children}
+        </div>
       </main>
 
       {/* Footer */}
