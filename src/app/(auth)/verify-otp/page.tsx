@@ -221,29 +221,24 @@ function VerifyOtpContent() {
   };
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center p-4 sm:p-8 lg:p-12 transition-colors duration-300">
-      {/* ============================================================== */}
-      {/* FULL-SCREEN REAL BUILDING BACKGROUND: BG_CV ASIA.webp (4K HD)  */}
-      {/* ============================================================== */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/images/BG_CV ASIA.webp"
-          alt="Gedung CV. Asia Plastik Sidoarjo"
-          fill
-          priority
-          unoptimized
-          quality={100}
-          className="object-cover object-center filter contrast-[1.03] brightness-100 dark:brightness-85 transition-all duration-300"
-        />
-        <div className="absolute inset-0 bg-slate-950/25 dark:bg-slate-950/70 transition-colors duration-300" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/40 to-slate-950/30" />
+    <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center p-4 sm:p-6 lg:p-8 transition-colors duration-300 font-sans select-none">
+      {/* Modern Aesthetic White Background with Organic Floating Light Blue Aurora Blobs */}
+      <div className="absolute inset-0 z-0 bg-[#f8fbff] dark:bg-slate-950 overflow-hidden transition-colors duration-500">
+        {/* Floating Aurora Blob 1 (Top-Right) */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-gradient-to-br from-sky-300/50 to-cyan-200/40 blur-3xl animate-pulse pointer-events-none dark:from-sky-900/30 dark:to-cyan-950/20" />
+        {/* Floating Aurora Blob 2 (Bottom-Left) */}
+        <div className="absolute -bottom-28 -left-28 w-[34rem] h-[34rem] rounded-full bg-gradient-to-tr from-blue-300/40 via-sky-200/50 to-indigo-200/30 blur-3xl pointer-events-none dark:from-blue-950/40 dark:via-sky-950/30" />
+        {/* Floating Aurora Blob 3 (Top-Center) */}
+        <div className="absolute top-1/4 left-1/3 w-80 h-80 rounded-full bg-gradient-to-b from-cyan-200/30 to-sky-100/50 blur-2xl pointer-events-none dark:from-cyan-950/20" />
       </div>
 
       {/* Floating Theme Toggle at Top Right */}
-      <ThemeToggle />
+      <div className="absolute top-6 right-6 z-30">
+        <ThemeToggle />
+      </div>
 
-      {/* Floating Corporate Identity Header on Top Left (Clean Transparent Logo, No Background Box) */}
-      <div className="absolute top-6 left-6 z-20">
+      {/* Floating Corporate Identity Header on Top Left */}
+      <div className="absolute top-6 left-6 z-30">
         <Link href="/" className="flex items-center gap-3.5 group">
           <Image
             src="/images/logo.webp"
@@ -251,10 +246,10 @@ function VerifyOtpContent() {
             width={271}
             height={92}
             priority
-            className="h-10 sm:h-12 w-auto object-contain filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] group-hover:opacity-90 transition-opacity"
+            className="h-10 sm:h-12 w-auto object-contain transition-all group-hover:opacity-90 filter brightness-0 dark:brightness-100 drop-shadow-sm opacity-90 dark:opacity-100"
           />
-          <div className="hidden sm:block border-l border-white/25 pl-3 py-0.5">
-            <span className="text-sm font-black tracking-tight block text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+          <div className="hidden sm:block border-l border-slate-300 dark:border-white/20 pl-3 py-0.5 transition-colors">
+            <span className="text-sm font-black tracking-tight block text-slate-900 dark:text-white transition-colors">
               CV. ASIA PLASTIK
             </span>
           </div>
@@ -262,8 +257,8 @@ function VerifyOtpContent() {
       </div>
 
       {/* Centered Glass Card */}
-      <div className="relative z-10 w-full max-w-lg my-auto pt-16 sm:pt-0">
-        <div className="rounded-3xl border border-white/30 dark:border-white/15 bg-white/90 dark:bg-slate-900/90 p-6 sm:p-8 shadow-2xl backdrop-blur-3xl ring-1 ring-black/10 dark:ring-white/10 transition-all duration-300">
+      <div className="relative z-20 w-full max-w-lg my-auto pt-16 sm:pt-0">
+        <div className="rounded-[2.25rem] border border-white/80 dark:border-white/10 bg-white/75 dark:bg-slate-900/85 p-6 sm:p-8 shadow-[0_30px_70px_rgba(56,189,248,0.18)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.7)] backdrop-blur-3xl ring-1 ring-sky-300/30 dark:ring-white/10 transition-all duration-300">
           
           {!isApprovedPending ? (
             /* STEP 2: ENTER OTP */

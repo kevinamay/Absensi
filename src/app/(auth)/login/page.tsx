@@ -168,7 +168,7 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center p-4 sm:p-8 lg:p-12 transition-colors duration-300 select-none">
+    <div className="min-h-screen w-full relative flex items-center justify-center p-4 sm:p-6 lg:p-8 overflow-hidden font-sans select-none">
       {/* Modern Aesthetic White Background with Organic Floating Light Blue Aurora Blobs */}
       <div className="absolute inset-0 z-0 bg-[#f8fbff] dark:bg-slate-950 overflow-hidden transition-colors duration-500">
         {/* Floating Aurora Blob 1 (Top-Right) */}
@@ -180,10 +180,12 @@ function LoginContent() {
       </div>
 
       {/* Floating Theme Toggle at Top Right */}
-      <ThemeToggle />
+      <div className="absolute top-6 right-6 z-30">
+        <ThemeToggle />
+      </div>
 
       {/* Floating Corporate Identity Header on Top Left */}
-      <div className="absolute top-6 left-6 z-20">
+      <div className="absolute top-6 left-6 z-30">
         <Link href="/" className="flex items-center gap-3.5 group">
           <Image
             src="/images/logo.webp"
@@ -201,8 +203,8 @@ function LoginContent() {
         </Link>
       </div>
 
-      {/* Centered Floating Frosted Card Container (Permanent Design B) */}
-      <div className="relative z-10 w-full max-w-md my-auto">
+      {/* Centered Neo-Glassmorphism Card Container */}
+      <div className="relative z-20 w-full max-w-md my-auto pt-16 sm:pt-0">
         {/* Pending HRD Approval Notice Banner */}
         {pendingApprovalNotice && (
           <div
@@ -253,7 +255,7 @@ function LoginContent() {
         )}
 
         {/* Floating Glassmorphic Authentication Card */}
-        <div className="rounded-3xl border border-white/30 dark:border-white/15 bg-white/85 dark:bg-slate-900/80 p-6 sm:p-8 shadow-2xl backdrop-blur-3xl ring-1 ring-black/10 dark:ring-white/10 relative overflow-hidden transition-all duration-300">
+        <div className="rounded-[2.25rem] border border-white/80 dark:border-white/10 bg-white/75 dark:bg-slate-900/75 p-6 sm:p-8 shadow-[0_30px_70px_rgba(56,189,248,0.18)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.7)] backdrop-blur-3xl ring-1 ring-sky-300/30 dark:ring-white/10 relative overflow-hidden transition-all duration-300">
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-700 dark:text-cyan-300 text-[11px] font-bold mb-2">
               <GraduationCap className="w-3.5 h-3.5" />
@@ -321,12 +323,12 @@ function LoginContent() {
 
           <form onSubmit={handleLoginSubmit} className="space-y-4" suppressHydrationWarning>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5">
                 Email SIAPkerja / MagangHub
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <Mail className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                 </div>
                 <input
                   type="email"
@@ -335,14 +337,14 @@ function LoginContent() {
                   placeholder="contoh: ahmad.fauzi@kemnaker.maganghub.id"
                   required
                   suppressHydrationWarning
-                  className="w-full rounded-xl border border-slate-300 dark:border-white/15 bg-white/90 dark:bg-slate-950/70 pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-600 dark:focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  className="w-full pl-10 pr-4 py-3 text-slate-900 dark:text-white text-sm focus:outline-none transition-all placeholder:text-slate-400 rounded-2xl bg-white/80 dark:bg-slate-950/80 border border-sky-100 dark:border-white/10 focus:ring-2 focus:ring-cyan-500 focus:shadow-[0_0_15px_rgba(6,182,212,0.15)]"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
                   Kata Sandi
                 </label>
                 <a
@@ -356,7 +358,7 @@ function LoginContent() {
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <Lock className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -365,13 +367,14 @@ function LoginContent() {
                   placeholder="••••••••••••"
                   required
                   suppressHydrationWarning
-                  className="w-full rounded-xl border border-slate-300 dark:border-white/15 bg-white/90 dark:bg-slate-950/70 pl-10 pr-10 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-600 dark:focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  className="w-full pl-10 pr-11 py-3 text-slate-900 dark:text-white text-sm focus:outline-none transition-all placeholder:text-slate-400 rounded-2xl bg-white/80 dark:bg-slate-950/80 border border-sky-100 dark:border-white/10 focus:ring-2 focus:ring-cyan-500 focus:shadow-[0_0_15px_rgba(6,182,212,0.15)]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   suppressHydrationWarning
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
+                  title={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -380,7 +383,7 @@ function LoginContent() {
 
             <Button
               type="submit"
-              className="w-full py-3.5 font-bold mt-2 bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white shadow-xl shadow-blue-900/30 border border-blue-400/30 rounded-xl cursor-pointer"
+              className="w-full py-3.5 text-white font-black cursor-pointer transition-all rounded-2xl bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 shadow-xl shadow-cyan-600/25 border border-cyan-400/30 mt-2"
               isLoading={submitting}
               disabled={submitting}
             >
@@ -392,7 +395,7 @@ function LoginContent() {
             <div className="pt-2 text-center">
               <Link
                 href="/register"
-                className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center justify-center gap-1.5"
+                className="text-xs font-semibold text-blue-600 dark:text-cyan-400 hover:underline flex items-center justify-center gap-1.5"
               >
                 <span>Peserta Baru? Buat & Aktivasi Sandi Akun Magang</span>
                 <ArrowRight className="w-3.5 h-3.5" />
