@@ -33,7 +33,7 @@ class _InternDashboardScreenState extends State<InternDashboardScreen> {
   bool _isInsideSimulated = true;
 
   // Form State
-  String _mainStatus = 'HADIR'; // 'HADIR' | 'IZIN_DENGAN_KETERANGAN' | 'IZIN_TANPA_KETERANGAN'
+  MainAttendanceStatus _mainStatus = MainAttendanceStatus.hadir;
   String _permissionCategory = 'IZIN'; // 'IZIN' | 'SAKIT'
   String _checkInTime = '07:30';
   String _checkOutTime = '16:30';
@@ -108,7 +108,7 @@ class _InternDashboardScreenState extends State<InternDashboardScreen> {
     final user = _authService.currentUser;
     if (user == null) return;
 
-    if (_mainStatus == 'IZIN_DENGAN_KETERANGAN' && _reasonController.text.trim().isEmpty) {
+    if (_mainStatus == MainAttendanceStatus.izinDenganKeterangan && _reasonController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Silakan masukkan rincian alasan izin atau sakit Anda.'),
@@ -132,7 +132,7 @@ class _InternDashboardScreenState extends State<InternDashboardScreen> {
         institution: user.institution,
         division: user.division,
         mainStatus: _mainStatus,
-        permissionSubCategory: _mainStatus == 'IZIN_DENGAN_KETERANGAN' ? _permissionCategory : null,
+        permissionSubCategory: _mainStatus == MainAttendanceStatus.izinDenganKeterangan ? _permissionCategory : null,
         checkInTime: _checkInTime,
         checkOutTime: _checkOutTime,
         permissionReason: _reasonController.text.trim(),
@@ -769,7 +769,7 @@ class _InternDashboardScreenState extends State<InternDashboardScreen> {
             children: [
               Expanded(
                 child: _buildStatusCard(
-                  key: 'HADIR',
+                  status: MainAttendanceStatus.hadir,
                   title: 'Hadir',
                   subtitle: 'Bekerja di pabrik',
                   icon: Icons.person_pin_circle_outlined,
@@ -779,7 +779,7 @@ class _InternDashboardScreenState extends State<InternDashboardScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: _buildStatusCard(
-                  key: 'IZIN_DENGAN_KETERANGAN',
+                  status: MainAttendanceStatus.izinDenganKeterangan,
                   title: 'Izin / Sakit',
                   subtitle: 'Dengan bukti surat',
                   icon: Icons.description_outlined,
@@ -789,7 +789,7 @@ class _InternDashboardScreenState extends State<InternDashboardScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: _buildStatusCard(
-                  key: 'IZIN_TANPA_KETERANGAN',
+                  status: MainAttendanceStatus.izinTanpaKeterangan,
                   title: 'Tanpa Surat',
                   subtitle: 'Izin tanpa berkas',
                   icon: Icons.help_outline_rounded,
@@ -801,7 +801,7 @@ class _InternDashboardScreenState extends State<InternDashboardScreen> {
           const SizedBox(height: 18),
 
           // Dynamic Status Container
-          if (_mainStatus == 'HADIR') ...[
+          if (_mainStatus == MainAttendanceStatus.hadir) ...[
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -837,7 +837,7 @@ class _InternDashboardScreenState extends State<InternDashboardScreen> {
                 ],
               ),
             ),
-          ] else if (_mainStatus == 'IZIN_DENGAN_KETERANGAN') ...[
+          ] else if (_mainStatus == MainAttendanceStatus.izinDenganKeterangan) ...[
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -1173,7 +1173,7 @@ class _InternDashboardScreenState extends State<InternDashboardScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              r.mainStatus == 'HADIR'
+                              r.mainStatus == MainAttendanceStatus.hadir
                                   ? 'Kehadiran Pabrik'
                                   : 'Permohonan ${r.permissionSubCategory ?? "Izin"}',
                               style: GoogleFonts.inter(
@@ -1221,16 +1221,16 @@ class _InternDashboardScreenState extends State<InternDashboardScreen> {
   }
 
   Widget _buildStatusCard({
-    required String key,
+    required MainAttendanceStatus status,
     required String title,
     required String subtitle,
     required IconData icon,
     required bool isDark,
   }) {
-    final isSelected = _mainStatus == key;
+    final isSelected = _mainStatus == status;
 
     return InkWell(
-      onTap: () => setState(() => _mainStatus = key),
+      onTap: () => setState(() => _mainStatus = status),
       borderRadius: BorderRadius.circular(16),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

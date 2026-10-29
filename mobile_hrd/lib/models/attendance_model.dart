@@ -1,3 +1,44 @@
+enum MainAttendanceStatus {
+  hadir,
+  izinDenganKeterangan,
+  izinTanpaKeterangan;
+
+  String get value {
+    switch (this) {
+      case MainAttendanceStatus.hadir:
+        return 'HADIR';
+      case MainAttendanceStatus.izinDenganKeterangan:
+        return 'IZIN_DENGAN_KETERANGAN';
+      case MainAttendanceStatus.izinTanpaKeterangan:
+        return 'IZIN_TANPA_KETERANGAN';
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case MainAttendanceStatus.hadir:
+        return 'Hadir';
+      case MainAttendanceStatus.izinDenganKeterangan:
+        return 'Izin / Sakit';
+      case MainAttendanceStatus.izinTanpaKeterangan:
+        return 'Tanpa Surat';
+    }
+  }
+
+  static MainAttendanceStatus fromString(String? val) {
+    if (val == null) return MainAttendanceStatus.hadir;
+    switch (val.toUpperCase()) {
+      case 'IZIN_DENGAN_KETERANGAN':
+        return MainAttendanceStatus.izinDenganKeterangan;
+      case 'IZIN_TANPA_KETERANGAN':
+        return MainAttendanceStatus.izinTanpaKeterangan;
+      case 'HADIR':
+      default:
+        return MainAttendanceStatus.hadir;
+    }
+  }
+}
+
 class AttendanceRecord {
   final String id;
   final String internId;
@@ -7,7 +48,7 @@ class AttendanceRecord {
   final String? division;
   final String type; // 'CHECK_IN' | 'CHECK_OUT'
   final String status; // 'PRESENT' | 'LATE' | 'PERMISSION' | 'SICK' | 'ABSENT'
-  final String mainStatus; // 'HADIR' | 'IZIN_DENGAN_KETERANGAN' | 'IZIN_TANPA_KETERANGAN'
+  final MainAttendanceStatus mainStatus;
   final String? permissionSubCategory; // 'IZIN' | 'SAKIT'
   final String? checkInTime;
   final String? checkOutTime;
@@ -47,9 +88,10 @@ class AttendanceRecord {
     required this.createdAt,
   });
 
-  bool get isPresent => mainStatus == 'HADIR';
+  bool get isPresent => mainStatus == MainAttendanceStatus.hadir;
   bool get isLate => status == 'LATE';
-  bool get isPermission => mainStatus.startsWith('IZIN');
+  bool get isPermission => mainStatus != MainAttendanceStatus.hadir;
+  String get mainStatusString => mainStatus.value;
 
   factory AttendanceRecord.fromJson(Map<String, dynamic> json) {
     final locationMap = json['location'] as Map<String, dynamic>? ?? {};
@@ -62,7 +104,7 @@ class AttendanceRecord {
       division: json['division'],
       type: json['type'] ?? 'CHECK_IN',
       status: json['status'] ?? 'PRESENT',
-      mainStatus: json['mainStatus'] ?? 'HADIR',
+      mainStatus: MainAttendanceStatus.fromString(json['mainStatus']),
       permissionSubCategory: json['permissionSubCategory'],
       checkInTime: json['checkInTime'],
       checkOutTime: json['checkOutTime'],
@@ -89,7 +131,7 @@ class AttendanceRecord {
       'division': division,
       'type': type,
       'status': status,
-      'mainStatus': mainStatus,
+      'mainStatus': mainStatus.value,
       'permissionSubCategory': permissionSubCategory,
       'checkInTime': checkInTime,
       'checkOutTime': checkOutTime,

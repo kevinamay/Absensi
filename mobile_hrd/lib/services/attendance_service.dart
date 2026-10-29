@@ -49,7 +49,7 @@ class AttendanceService {
     String? internStudentId,
     String? institution,
     String? division,
-    required String mainStatus,
+    required MainAttendanceStatus mainStatus,
     String? permissionSubCategory,
     String? checkInTime,
     String? checkOutTime,
@@ -66,7 +66,7 @@ class AttendanceService {
 
     // Evaluate on-time status: On time if before 08:15 WIB
     String attendanceStatus = 'PRESENT';
-    if (mainStatus == 'HADIR') {
+    if (mainStatus == MainAttendanceStatus.hadir) {
       final hour = now.hour;
       final minute = now.minute;
       if (hour > 8 || (hour == 8 && minute > 15)) {
