@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+// Global ValueNotifier for reactive Light/Dark mode toggling
+final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.light);
+
 class AppTheme {
   // Soft pastel sky palette (Variant A - Soft Azure Horizon)
   static const Color primarySky = Color(0xFF0284C7); // Sky-600
@@ -43,11 +46,13 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
+      brightness: Brightness.light,
       colorScheme: ColorScheme.fromSeed(
         seedColor: primarySky,
         primary: primarySky,
         secondary: accentCyan,
         surface: Colors.white,
+        brightness: Brightness.light,
       ),
       scaffoldBackgroundColor: backgroundLight,
       textTheme: textTheme.apply(
@@ -89,42 +94,61 @@ class AppTheme {
           ),
         ),
       ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: primarySky,
-          side: const BorderSide(color: Color(0xFFBAE6FD), width: 1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+    );
+  }
+
+  static ThemeData get darkTheme {
+    final textTheme = GoogleFonts.interTextTheme();
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primarySky,
+        primary: primarySky,
+        secondary: accentCyan,
+        surface: const Color(0xFF0F172A),
+        brightness: Brightness.dark,
+      ),
+      scaffoldBackgroundColor: const Color(0xFF020617), // slate-950
+      textTheme: textTheme.apply(
+        bodyColor: Colors.white,
+        displayColor: Colors.white,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: const Color(0xFF0F172A).withValues(alpha: 0.9),
+        elevation: 0,
+        centerTitle: false,
+        iconTheme: const IconThemeData(color: Colors.white),
+        titleTextStyle: GoogleFonts.inter(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: const Color(0xFF0F172A),
+        elevation: 2,
+        shadowColor: Colors.black.withValues(alpha: 0.5),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primarySky,
+          foregroundColor: Colors.white,
+          elevation: 2,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
           textStyle: GoogleFonts.inter(
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
         ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: borderLight),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: borderLight),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: primarySky, width: 1.8),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: statusRed),
-        ),
-        labelStyle: GoogleFonts.inter(color: textMuted, fontSize: 14),
-        hintStyle: GoogleFonts.inter(color: textMuted.withValues(alpha: 0.6), fontSize: 14),
       ),
     );
   }
