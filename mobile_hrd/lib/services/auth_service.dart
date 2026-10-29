@@ -140,9 +140,9 @@ class AuthService extends ChangeNotifier {
     return true;
   }
 
-  /// Approve pending registration (HRD action)
-  void approveRegistration(String id) {
-    final index = _pendingRegistrations.indexIndexWhere((r) => r.id == id);
+  /// Process HRD approval action (APPROVE or REJECT)
+  void processApproval(String id, String action, [String? reason]) {
+    final index = _pendingRegistrations.indexWhere((r) => r.id == id);
     if (index != -1) {
       final item = _pendingRegistrations[index];
       _pendingRegistrations[index] = PendingRegistration(
@@ -150,30 +150,23 @@ class AuthService extends ChangeNotifier {
         email: item.email,
         fullName: item.fullName,
         institution: item.institution,
-        status: 'APPROVED',
+        status: action == 'APPROVE' ? 'APPROVED' : 'REJECTED',
         createdAt: item.createdAt,
-        approvedAt: DateTime.now().toIso8601String(),
+        approvedAt: action == 'APPROVE' ? DateTime.now().toIso8601String() : null,
+        rejectionReason: action == 'REJECT' ? (reason ?? 'Ditolak oleh HRD') : null,
       );
       notifyListeners();
     }
   }
 
+  /// Approve pending registration (HRD action)
+  void approveRegistration(String id) {
+    processApproval(id, 'APPROVE');
+  }
+
   /// Reject pending registration (HRD action)
   void rejectRegistration(String id, String reason) {
-    final index = _pendingRegistrations.indexIndexWhere((r) => r.id == id);
-    if (index != -1) {
-      final item = _pendingRegistrations[index];
-      _pendingRegistrations[index] = PendingRegistration(
-        id: item.id,
-        email: item.email,
-        fullName: item.fullName,
-        institution: item.institution,
-        status: 'REJECTED',
-        createdAt: item.createdAt,
-        rejectionReason: reason,
-      );
-      notifyListeners();
-    }
+    processApproval(id, 'REJECT', reason);
   }
 
   void logout() {

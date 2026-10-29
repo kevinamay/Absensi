@@ -1,6 +1,9 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../config/app_theme.dart';
+import '../../models/attendance_model.dart';
+import '../../models/approval_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/attendance_service.dart';
 import '../auth/login_screen.dart';
@@ -16,9 +19,17 @@ class _HrdDashboardScreenState extends State<HrdDashboardScreen> {
   final _authService = AuthService();
   final _attendanceService = AttendanceService();
 
-  int _selectedTabIndex = 0; // 0 = Riwayat Presensi, 1 = ACC Akun Magang
-  String _searchQuery = '';
-  String _selectedFilter = 'Semua'; // 'Semua' | 'Tepat Waktu' | 'Terlambat' | 'Izin'
+  int _selectedTabIndex = 0; // 0 = Riwayat Presensi Magang, 1 = Persetujuan Akun Magang (ACC)
+  String _searchTerm = '';
+  String _filterType = 'ALL'; // 'ALL', 'PRESENT', 'LATE'
+  String _approvalFilter = 'ALL'; // 'ALL', 'PENDING_APPROVAL', 'APPROVED', 'REJECTED'
+
+  void _toggleTheme() {
+    final current = themeModeNotifier.value;
+    final next = current == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    themeModeNotifier.value = next;
+    setState(() {});
+  }
 
   void _handleLogout() {
     _authService.logout();
@@ -31,737 +42,1351 @@ class _HrdDashboardScreenState extends State<HrdDashboardScreen> {
   void _exportReport() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Laporan Rekap Presensi Magang berhasil diunduh (Format CSV / Excel)!'),
-        backgroundColor: AppTheme.statusGreen,
+        content: Text('Laporan Rekap Presensi Magang berhasil diekspor (Format CSV / Excel)!'),
+        backgroundColor: Color(0xFF10B981),
+      ),
+    );
+  }
+
+  void _handleApprovalAction(String id, String action) {
+    setState(() {
+      _authService.processApproval(id, action);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          action == 'APPROVE'
+              ? 'Akun magang berhasil disetujui (ACC). Peserta kini dapat login.'
+              : 'Pendaftaran akun magang telah ditolak.',
+        ),
+        backgroundColor: action == 'APPROVE' ? const Color(0xFF10B981) : const Color(0xFFEF4444),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = themeModeNotifier.value == ThemeMode.dark;
+    final user = _authService.currentUser;
     final allRecords = _attendanceService.getAllRecords();
-    final pendingList = _authService.pendingRegistrations;
+    final allRegistrations = _authService.pendingRegistrations;
 
-    // Calculate metrics
-    final totalPresensi = allRecords.length;
-    final onTimeCount = allRecords.where((r) => r.status == 'PRESENT').length;
+    // Metrics
+    final presentCount = allRecords.where((r) => r.status == 'PRESENT').length;
     final lateCount = allRecords.where((r) => r.status == 'LATE').length;
-    final pendingCount = pendingList.where((p) => p.status == 'PENDING_APPROVAL').length;
+    final pendingApprovalsCount = allRegistrations.where((r) => r.status == 'PENDING_APPROVAL').length;
 
-    // Filter records
+    // Filtered attendance records
     final filteredRecords = allRecords.where((r) {
-      if (_searchQuery.isNotEmpty) {
-        final query = _searchQuery.toLowerCase();
-        final matchName = r.internName.toLowerCase().contains(query);
-        final matchInst = (r.institution ?? '').toLowerCase().contains(query);
-        final matchDiv = (r.division ?? '').toLowerCase().contains(query);
-        if (!matchName && !matchInst && !matchDiv) return false;
-      }
+      final matchesSearch = r.internName.toLowerCase().contains(_searchTerm.toLowerCase()) ||
+          (r.institution ?? '').toLowerCase().contains(_searchTerm.toLowerCase()) ||
+          (r.division ?? '').toLowerCase().contains(_searchTerm.toLowerCase());
 
-      if (_selectedFilter == 'Tepat Waktu') {
-        return r.status == 'PRESENT';
-      } else if (_selectedFilter == 'Terlambat') {
-        return r.status == 'LATE';
-      } else if (_selectedFilter == 'Izin') {
-        return r.mainStatus != 'HADIR';
-      }
-      return true;
+      if (_filterType == 'ALL') return matchesSearch;
+      if (_filterType == 'PRESENT') return matchesSearch && r.status == 'PRESENT';
+      if (_filterType == 'LATE') return matchesSearch && r.status == 'LATE';
+      return matchesSearch;
+    }).toList();
+
+    // Filtered registrations
+    final filteredRegistrations = allRegistrations.where((r) {
+      final matches = r.fullName.toLowerCase().contains(_searchTerm.toLowerCase()) ||
+          r.email.toLowerCase().contains(_searchTerm.toLowerCase()) ||
+          r.institution.toLowerCase().contains(_searchTerm.toLowerCase());
+
+      if (_approvalFilter == 'ALL') return matches;
+      return matches && r.status == _approvalFilter;
     }).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: Image.asset(
-                'assets/images/logo.webp',
-                errorBuilder: (context, error, stackTrace) => const Icon(
-                  Icons.shield_rounded,
-                  size: 18,
-                  color: AppTheme.primarySky,
+      backgroundColor: isDark ? const Color(0xFF020617) : const Color(0xFFF8FBFF),
+      body: Stack(
+        children: [
+          // 1. Base Silky-Smooth Pastel Sky Gradient (Matches Web)
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isDark
+                      ? const [
+                          Color(0xFF020617),
+                          Color(0xFF0B132B),
+                          Color(0xFF020617),
+                        ]
+                      : const [
+                          Color(0xFFE0F2FE),
+                          Color(0xFFF0F9FF),
+                          Color(0xFFF8FBFF),
+                          Color(0xFFEBF5FF),
+                          Color(0xFFE0F7FA),
+                        ],
                 ),
               ),
             ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+
+          // 2. Gaussian-Blurred Organic Floating Aurora Glows
+          Positioned.fill(
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 85, sigmaY: 85),
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: -40,
+                    right: -40,
+                    child: Container(
+                      width: 320,
+                      height: 320,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark
+                            ? const Color(0xFF0284C7).withValues(alpha: 0.16)
+                            : const Color(0xFF7DD3FC).withValues(alpha: 0.45),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: -60,
+                    left: -60,
+                    child: Container(
+                      width: 360,
+                      height: 360,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark
+                            ? const Color(0xFF1E1B4B).withValues(alpha: 0.3)
+                            : const Color(0xFF93C5FD).withValues(alpha: 0.42),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Main Scrollable Area with Sticky Top Navbar
+          SafeArea(
+            child: Column(
               children: [
-                Text(
-                  'Dasbor HRD & Supervisor',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                // Top Navbar (Matches Web Navbar Layout)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF0F172A).withValues(alpha: 0.85)
+                        : Colors.white.withValues(alpha: 0.85),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : const Color(0xFFE2E8F0),
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Left: Logo + Company Name & Portal Tag
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            'assets/images/logo.webp',
+                            height: 34,
+                            fit: BoxFit.contain,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            colorBlendMode: BlendMode.srcIn,
+                            errorBuilder: (_, __, ___) => Icon(
+                              Icons.factory_rounded,
+                              size: 26,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Container(
+                            height: 24,
+                            width: 1,
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.2)
+                                : const Color(0xFFCBD5E1),
+                          ),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'CV. ASIA PLASTIK',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w900,
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              Text(
+                                'PORTAL HRD & SUPERVISOR',
+                                style: GoogleFonts.inter(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFFD97706), // Amber-600
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+
+                      // Right: User Identity Chip + Theme Toggle + Logout Button
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // User Chip (Hidden on very narrow screens)
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              return MediaQuery.of(context).size.width > 700
+                                  ? Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      margin: const EdgeInsets.only(right: 8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF59E0B).withValues(alpha: isDark ? 0.15 : 0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.shield_rounded,
+                                            size: 14,
+                                            color: Color(0xFFD97706),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                user?.displayName ?? 'Administrator HRD',
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                                ),
+                                              ),
+                                              Text(
+                                                user?.division ?? 'Human Resources & General Affairs',
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 9,
+                                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFD97706),
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              'HR / SUPERVISOR',
+                                              style: GoogleFonts.inter(
+                                                fontSize: 8,
+                                                fontWeight: FontWeight.w800,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : const SizedBox.shrink();
+                            },
+                          ),
+
+                          // Mode Terang / Gelap Pill
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: _toggleTheme,
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF0F172A).withValues(alpha: 0.9)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? const Color(0xFF334155)
+                                        : const Color(0xFFE2E8F0),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isDark ? Icons.light_mode_rounded : Icons.dark_mode_outlined,
+                                      size: 14,
+                                      color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF334155),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      isDark ? 'Mode Gelap' : 'Mode Terang',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF334155),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+
+                          // Logout Button
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: _handleLogout,
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xFFFDA4AF), // Rose-300
+                                  ),
+                                  color: const Color(0xFFFFF1F2).withValues(alpha: isDark ? 0.1 : 0.8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.logout_rounded,
+                                      size: 13,
+                                      color: Color(0xFFE11D48),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Keluar',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFFE11D48),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  'CV. Asia Plastik Industri',
-                  style: GoogleFonts.inter(
-                    fontSize: 10,
-                    color: AppTheme.textMuted,
+
+                // Main Dashboard Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Page Header: Title + Subtitle + Action Button
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Pill: SUPERVISOR & HR PORTAL
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF59E0B).withValues(alpha: isDark ? 0.2 : 0.12),
+                                        borderRadius: BorderRadius.circular(14),
+                                        border: Border.all(
+                                          color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.shield_rounded,
+                                            size: 12,
+                                            color: Color(0xFFD97706),
+                                          ),
+                                          const SizedBox(width: 5),
+                                          Text(
+                                            'SUPERVISOR & HR PORTAL',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: 0.6,
+                                              color: const Color(0xFFD97706),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+
+                                    // Main Title
+                                    Text(
+                                      'Dasbor HRD CV. Asia Plastik',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w900,
+                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        letterSpacing: -0.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+
+                                    // Subtitle
+                                    Text(
+                                      'Pusat manajemen presensi real-time dan verifikasi persetujuan akun magang industri.',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12,
+                                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // Header Action Button
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: _selectedTabIndex == 0
+                                      ? _exportReport
+                                      : () => setState(() {}),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? const Color(0xFF0F172A)
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: isDark
+                                            ? Colors.white.withValues(alpha: 0.15)
+                                            : const Color(0xFFCBD5E1),
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.04),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          _selectedTabIndex == 0
+                                              ? Icons.download_rounded
+                                              : Icons.refresh_rounded,
+                                          size: 14,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          _selectedTabIndex == 0
+                                              ? 'Ekspor Laporan Presensi'
+                                              : 'Segarkan Antrean',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Tab Switcher
+                          Row(
+                            children: [
+                              // Tab 1: Riwayat Presensi Magang
+                              InkWell(
+                                onTap: () => setState(() => _selectedTabIndex = 0),
+                                borderRadius: BorderRadius.circular(12),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                                  decoration: BoxDecoration(
+                                    color: _selectedTabIndex == 0
+                                        ? const Color(0xFF2563EB)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: _selectedTabIndex == 0
+                                        ? [
+                                            BoxShadow(
+                                              color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+                                              blurRadius: 10,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.people_alt_rounded,
+                                        size: 15,
+                                        color: _selectedTabIndex == 0
+                                            ? Colors.white
+                                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Riwayat Presensi Magang',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: _selectedTabIndex == 0
+                                              ? Colors.white
+                                              : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+
+                              // Tab 2: Persetujuan Akun Magang (ACC)
+                              InkWell(
+                                onTap: () => setState(() => _selectedTabIndex = 1),
+                                borderRadius: BorderRadius.circular(12),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                                  decoration: BoxDecoration(
+                                    color: _selectedTabIndex == 1
+                                        ? const Color(0xFF2563EB)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: _selectedTabIndex == 1
+                                        ? [
+                                            BoxShadow(
+                                              color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+                                              blurRadius: 10,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.person_add_alt_1_rounded,
+                                        size: 15,
+                                        color: _selectedTabIndex == 1
+                                            ? Colors.white
+                                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Persetujuan Akun Magang (ACC)',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: _selectedTabIndex == 1
+                                              ? Colors.white
+                                              : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                        ),
+                                      ),
+                                      if (pendingApprovalsCount > 0) ...[
+                                        const SizedBox(width: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFF59E0B),
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: Text(
+                                            '$pendingApprovalsCount',
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w900,
+                                              color: Color(0xFF0F172A),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+
+                          // KPI Stats Cards (3 Cards)
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isWide = constraints.maxWidth > 700;
+                              final cardWidgets = [
+                                _buildKpiCard(
+                                  title: 'TOTAL KEHADIRAN HARI INI',
+                                  count: '${allRecords.length}',
+                                  label: 'peserta tercatat',
+                                  icon: Icons.people_alt_outlined,
+                                  iconColor: const Color(0xFF2563EB),
+                                  countColor: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  isDark: isDark,
+                                ),
+                                _buildKpiCard(
+                                  title: 'TEPAT WAKTU (ON TIME)',
+                                  count: '$presentCount',
+                                  label: 'sebelum 08:15 WIB',
+                                  icon: Icons.check_circle_outline_rounded,
+                                  iconColor: const Color(0xFF10B981),
+                                  countColor: const Color(0xFF059669),
+                                  isDark: isDark,
+                                ),
+                                _buildKpiCard(
+                                  title: 'TERLAMBAT',
+                                  count: '$lateCount',
+                                  label: 'perlu konfirmasi',
+                                  icon: Icons.warning_amber_rounded,
+                                  iconColor: const Color(0xFFF59E0B),
+                                  countColor: const Color(0xFFD97706),
+                                  isDark: isDark,
+                                ),
+                              ];
+
+                              return isWide
+                                  ? Row(
+                                      children: cardWidgets
+                                          .map((c) => Expanded(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                                                  child: c,
+                                                ),
+                                              ))
+                                          .toList(),
+                                    )
+                                  : Column(
+                                      children: cardWidgets
+                                          .map((c) => Padding(
+                                                padding: const EdgeInsets.only(bottom: 10),
+                                                child: c,
+                                              ))
+                                          .toList(),
+                                    );
+                            },
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Content: Tab 1 Attendance or Tab 2 Approvals
+                          _selectedTabIndex == 0
+                              ? _buildAttendanceTableCard(isDark, filteredRecords)
+                              : _buildApprovalsCard(isDark, filteredRegistrations),
+
+                          const SizedBox(height: 28),
+
+                          // Footer Info
+                          Center(
+                            child: Text(
+                              'CV. Asia Plastik HR Management Console • Dedicated Portal',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.download_rounded, size: 20),
-            tooltip: 'Ekspor Laporan Presensi',
-            onPressed: _exportReport,
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout_rounded, size: 20),
-            tooltip: 'Keluar',
-            onPressed: _handleLogout,
           ),
         ],
       ),
-      body: Container(
-        decoration: AppTheme.softSkyBackground,
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+
+  // KPI STATS CARD WIDGET
+  Widget _buildKpiCard({
+    required String title,
+    required String count,
+    required String label,
+    required IconData icon,
+    required Color iconColor,
+    required Color countColor,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0F172A).withValues(alpha: 0.85) : Colors.white.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFE2E8F0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
+              ),
+              Icon(icon, size: 16, color: iconColor),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                count,
+                style: GoogleFonts.inter(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: countColor,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // TAB 1: ATTENDANCE TABLE CARD
+  Widget _buildAttendanceTableCard(bool isDark, List<AttendanceRecord> records) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0F172A).withValues(alpha: 0.85) : Colors.white.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFE2E8F0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with Search and Filter Pills
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Top Navigation Segmented Pill
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.borderLight),
+                Text(
+                  'Daftar Log Kehadiran Pabrik',
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
+                ),
+
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Search Input
+                    Container(
+                      width: 190,
+                      height: 34,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF020617) : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFCBD5E1),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.search_rounded, size: 14, color: Color(0xFF94A3B8)),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: TextField(
+                              onChanged: (val) => setState(() => _searchTerm = val),
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
+                              decoration: const InputDecoration(
+                                hintText: 'Cari nama, kampus, divisi...',
+                                hintStyle: TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
+                                border: InputBorder.none,
+                                isDense: true,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Filter Pills
+                    Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF020617) : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          _buildFilterButton('ALL', 'Semua', isDark),
+                          _buildFilterButton('PRESENT', 'Tepat Waktu', isDark),
+                          _buildFilterButton('LATE', 'Terlambat', isDark),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+
+          // Table Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            color: isDark ? Colors.white.withValues(alpha: 0.02) : const Color(0xFFF8FAFC),
+            child: Row(
+              children: [
+                Expanded(flex: 3, child: _buildTableHeader('NAMA PESERTA / NIM', isDark)),
+                Expanded(flex: 3, child: _buildTableHeader('INSTITUSI / KAMPUS', isDark)),
+                Expanded(flex: 2, child: _buildTableHeader('DIVISI PENEMPATAN', isDark)),
+                Expanded(flex: 2, child: _buildTableHeader('JAM PRESENSI', isDark)),
+                Expanded(flex: 2, child: _buildTableHeader('VALIDASI GPS', isDark)),
+                Expanded(flex: 2, child: _buildTableHeader('STATUS', isDark)),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+
+          // Table Body or Empty State
+          if (records.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Center(
+                child: Text(
+                  'Tidak ditemukan data presensi yang sesuai.',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  ),
+                ),
+              ),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: records.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final r = records[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                   child: Row(
                     children: [
+                      // Name & Student ID
                       Expanded(
-                        child: InkWell(
-                          onTap: () => setState(() => _selectedTabIndex = 0),
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              color: _selectedTabIndex == 0
-                                  ? AppTheme.primarySky
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(12),
+                        flex: 3,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              r.internName,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.history_rounded,
-                                  size: 16,
-                                  color: _selectedTabIndex == 0
-                                      ? Colors.white
-                                      : AppTheme.textMuted,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Riwayat Presensi',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: _selectedTabIndex == 0
-                                        ? Colors.white
-                                        : AppTheme.textMuted,
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              r.internStudentId ?? '-',
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                              ),
                             ),
+                          ],
+                        ),
+                      ),
+
+                      // Institution
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          r.institution ?? '-',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
                           ),
                         ),
                       ),
+
+                      // Division
                       Expanded(
-                        child: InkWell(
-                          onTap: () => setState(() => _selectedTabIndex = 1),
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              color: _selectedTabIndex == 1
-                                  ? AppTheme.primarySky
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(12),
+                        flex: 2,
+                        child: Text(
+                          r.division ?? '-',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                          ),
+                        ),
+                      ),
+
+                      // Time
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          r.formattedTime,
+                          style: GoogleFonts.robotoMono(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                        ),
+                      ),
+
+                      // GPS
+                      Expanded(
+                        flex: 2,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFF10B981),
+                              ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.how_to_reg_rounded,
-                                  size: 16,
-                                  color: _selectedTabIndex == 1
-                                      ? Colors.white
-                                      : AppTheme.textMuted,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Persetujuan Akun (ACC)',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: _selectedTabIndex == 1
-                                        ? Colors.white
-                                        : AppTheme.textMuted,
-                                  ),
-                                ),
-                                if (pendingCount > 0) ...[
-                                  const SizedBox(width: 6),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: _selectedTabIndex == 1
-                                          ? Colors.white.withValues(alpha: 0.25)
-                                          : AppTheme.statusAmberBg,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Text(
-                                      '$pendingCount',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w800,
-                                        color: _selectedTabIndex == 1
-                                            ? Colors.white
-                                            : AppTheme.statusAmber,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ],
+                            const SizedBox(width: 5),
+                            Text(
+                              '${r.distanceFromOfficeMeters.round()}m OK',
+                              style: GoogleFonts.robotoMono(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF059669),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Status Badge
+                      Expanded(
+                        flex: 2,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: r.status == 'PRESENT'
+                                  ? const Color(0xFFECFDF5)
+                                  : const Color(0xFFFFFBEB),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: r.status == 'PRESENT'
+                                    ? const Color(0xFFA7F3D0)
+                                    : const Color(0xFFFDE68A),
+                              ),
+                            ),
+                            child: Text(
+                              r.status == 'PRESENT' ? 'TEPAT WAKTU' : 'TERLAMBAT',
+                              style: GoogleFonts.inter(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                color: r.status == 'PRESENT'
+                                    ? const Color(0xFF065F46)
+                                    : const Color(0xFF92400E),
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ],
                   ),
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  // TAB 2: APPROVALS CARD
+  Widget _buildApprovalsCard(bool isDark, List<PendingRegistration> registrations) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0F172A).withValues(alpha: 0.85) : Colors.white.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFE2E8F0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Antrean Verifikasi Akun Magang Baru',
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
                 ),
-                const SizedBox(height: 16),
-
-                // Metrics Cards Row
-                Row(
-                  children: [
-                    _buildMetricCard(
-                      title: 'TOTAL HADIR',
-                      count: '$totalPresensi',
-                      subtitle: 'peserta tercatat',
-                      icon: Icons.people_outline_rounded,
-                      color: AppTheme.primarySky,
-                      bg: AppTheme.softBlueTint,
-                    ),
-                    const SizedBox(width: 10),
-                    _buildMetricCard(
-                      title: 'TEPAT WAKTU',
-                      count: '$onTimeCount',
-                      subtitle: 'sebelum 08:15 WIB',
-                      icon: Icons.check_circle_outline_rounded,
-                      color: AppTheme.statusGreen,
-                      bg: AppTheme.statusGreenBg,
-                    ),
-                    const SizedBox(width: 10),
-                    _buildMetricCard(
-                      title: 'TERLAMBAT',
-                      count: '$lateCount',
-                      subtitle: 'perlu konfirmasi',
-                      icon: Icons.warning_amber_rounded,
-                      color: AppTheme.statusAmber,
-                      bg: AppTheme.statusAmberBg,
-                    ),
-                  ],
+                Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF020617) : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      _buildApprovalFilterButton('ALL', 'Semua', isDark),
+                      _buildApprovalFilterButton('PENDING_APPROVAL', 'Menunggu ACC', isDark),
+                      _buildApprovalFilterButton('APPROVED', 'Disetujui', isDark),
+                      _buildApprovalFilterButton('REJECTED', 'Ditolak', isDark),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
 
-                // TAB 0: RIWAYAT PRESENSI MAGANG
-                if (_selectedTabIndex == 0) ...[
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Daftar Log Kehadiran Pabrik',
-                            style: GoogleFonts.inter(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: AppTheme.textMain,
+          if (registrations.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Center(
+                child: Text(
+                  'Tidak ada permohonan akun dalam antrean.',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  ),
+                ),
+              ),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: registrations.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final reg = registrations[index];
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Avatar Icon
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.person_outline_rounded, color: Color(0xFF2563EB), size: 20),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+
+                      // Details
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              reg.fullName,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Search Bar
-                          TextField(
-                            decoration: const InputDecoration(
-                              hintText: 'Cari nama, kampus, divisi...',
-                              prefixIcon: Icon(Icons.search_rounded, size: 20),
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 12),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${reg.institution} • ${reg.email}',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                              ),
                             ),
-                            onChanged: (val) {
-                              setState(() {
-                                _searchQuery = val;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 12),
+                          ],
+                        ),
+                      ),
 
-                          // Filter Chips
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
+                      // Status Badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        margin: const EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          color: reg.status == 'APPROVED'
+                              ? const Color(0xFFECFDF5)
+                              : reg.status == 'REJECTED'
+                                  ? const Color(0xFFFEF2F2)
+                                  : const Color(0xFFFFFBEB),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: reg.status == 'APPROVED'
+                                ? const Color(0xFFA7F3D0)
+                                : reg.status == 'REJECTED'
+                                    ? const Color(0xFFFECDD3)
+                                    : const Color(0xFFFDE68A),
+                          ),
+                        ),
+                        child: Text(
+                          reg.status == 'APPROVED'
+                              ? 'DISETUJUI (ACC)'
+                              : reg.status == 'REJECTED'
+                                  ? 'DITOLAK'
+                                  : 'MENUNGGU ACC',
+                          style: GoogleFonts.inter(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: reg.status == 'APPROVED'
+                                ? const Color(0xFF065F46)
+                                : reg.status == 'REJECTED'
+                                    ? const Color(0xFF9F1239)
+                                    : const Color(0xFF92400E),
+                          ),
+                        ),
+                      ),
+
+                      // Action Buttons (if pending)
+                      if (reg.status == 'PENDING_APPROVAL') ...[
+                        InkWell(
+                          onTap: () => _handleApprovalAction(reg.id, 'APPROVE'),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10B981),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Row(
                               children: [
-                                _buildFilterChip('Semua'),
-                                const SizedBox(width: 8),
-                                _buildFilterChip('Tepat Waktu'),
-                                const SizedBox(width: 8),
-                                _buildFilterChip('Terlambat'),
-                                const SizedBox(width: 8),
-                                _buildFilterChip('Izin'),
+                                Icon(Icons.check_rounded, color: Colors.white, size: 13),
+                                SizedBox(width: 4),
+                                Text(
+                                  'ACC',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                          const Divider(height: 24),
-
-                          if (filteredRecords.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 24),
-                              child: Center(
-                                child: Text(
-                                  'Tidak ditemukan data presensi yang sesuai.',
-                                  style: GoogleFonts.inter(
-                                      fontSize: 12, color: AppTheme.textMuted),
-                                ),
-                              ),
-                            )
-                          else
-                            ListView.separated(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: filteredRecords.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 10),
-                              itemBuilder: (context, index) {
-                                final item = filteredRecords[index];
-                                final isLate = item.status == 'LATE';
-                                final isPresent = item.mainStatus == 'HADIR';
-
-                                return Container(
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(color: AppTheme.borderLight),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              item.internName,
-                                              style: GoogleFonts.inter(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w700,
-                                                color: AppTheme.textMain,
-                                              ),
-                                            ),
-                                          ),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 3),
-                                            decoration: BoxDecoration(
-                                              color: isPresent
-                                                  ? (isLate
-                                                      ? AppTheme.statusAmberBg
-                                                      : AppTheme.statusGreenBg)
-                                                  : AppTheme.statusBlueBg,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: Text(
-                                              isPresent
-                                                  ? (isLate
-                                                      ? 'Terlambat'
-                                                      : 'Tepat Waktu')
-                                                  : 'Izin',
-                                              style: GoogleFonts.inter(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w700,
-                                                color: isPresent
-                                                    ? (isLate
-                                                        ? AppTheme.statusAmber
-                                                        : AppTheme.statusGreen)
-                                                    : AppTheme.statusBlue,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '${item.institution ?? '-'} • Divisi: ${item.division ?? '-'}',
-                                        style: GoogleFonts.inter(
-                                          fontSize: 11,
-                                          color: AppTheme.textMuted,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.access_time_rounded,
-                                              size: 14, color: AppTheme.textMuted),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            '${item.formattedTime} (${item.officeName ?? 'Pabrik'})',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w500,
-                                              color: AppTheme.textMain,
-                                            ),
-                                          ),
-                                          const Spacer(),
-                                          Icon(
-                                            item.isWithinGeofence
-                                                ? Icons.gps_fixed_rounded
-                                                : Icons.gps_off_rounded,
-                                            size: 14,
-                                            color: item.isWithinGeofence
-                                                ? AppTheme.statusGreen
-                                                : AppTheme.statusAmber,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            item.isWithinGeofence
-                                                ? 'Radius OK'
-                                                : 'Luar Area',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w600,
-                                              color: item.isWithinGeofence
-                                                  ? AppTheme.statusGreen
-                                                  : AppTheme.statusAmber,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
+                        ),
+                        const SizedBox(width: 6),
+                        InkWell(
+                          onTap: () => _handleApprovalAction(reg.id, 'REJECT'),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEF4444),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-
-                // TAB 1: PERSETUJUAN AKUN MAGANG (ACC)
-                if (_selectedTabIndex == 1) ...[
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Antrean Verifikasi Pendaftar Magang',
-                                style: GoogleFonts.inter(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppTheme.textMain,
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.statusAmberBg,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  '$pendingCount Menunggu',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppTheme.statusAmber,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Verifikasi pendaftar baru sebelum mereka dapat mengisi presensi pabrik.',
-                            style: GoogleFonts.inter(
-                                fontSize: 11, color: AppTheme.textMuted),
-                          ),
-                          const Divider(height: 24),
-
-                          if (pendingList.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 24),
-                              child: Center(
-                                child: Text(
-                                  'Tidak ada antrean pendaftaran magang saat ini.',
-                                  style: GoogleFonts.inter(
-                                      fontSize: 12, color: AppTheme.textMuted),
-                                ),
-                              ),
-                            )
-                          else
-                            ListView.separated(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: pendingList.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 12),
-                              itemBuilder: (context, index) {
-                                final reg = pendingList[index];
-                                final isApproved = reg.status == 'APPROVED';
-                                final isPending = reg.status == 'PENDING_APPROVAL';
-
-                                return Container(
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
+                            child: const Row(
+                              children: [
+                                Icon(Icons.close_rounded, color: Colors.white, size: 13),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Tolak',
+                                  style: TextStyle(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(color: AppTheme.borderLight),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              reg.fullName,
-                                              style: GoogleFonts.inter(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w700,
-                                                color: AppTheme.textMain,
-                                              ),
-                                            ),
-                                          ),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 3),
-                                            decoration: BoxDecoration(
-                                              color: isApproved
-                                                  ? AppTheme.statusGreenBg
-                                                  : (isPending
-                                                      ? AppTheme.statusAmberBg
-                                                      : AppTheme.statusRedBg),
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: Text(
-                                              isApproved
-                                                  ? 'Disetujui (ACC)'
-                                                  : (isPending
-                                                      ? 'Pending Review'
-                                                      : 'Ditolak'),
-                                              style: GoogleFonts.inter(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w700,
-                                                color: isApproved
-                                                    ? AppTheme.statusGreen
-                                                    : (isPending
-                                                        ? AppTheme.statusAmber
-                                                        : AppTheme.statusRed),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Email: ${reg.email}',
-                                        style: GoogleFonts.inter(
-                                          fontSize: 11,
-                                          color: AppTheme.textMuted,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Instansi: ${reg.institution}',
-                                        style: GoogleFonts.inter(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w500,
-                                          color: AppTheme.textMain,
-                                        ),
-                                      ),
-                                      if (isPending) ...[
-                                        const SizedBox(height: 12),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: ElevatedButton.icon(
-                                                icon: const Icon(
-                                                    Icons.check_rounded,
-                                                    size: 16),
-                                                label: const Text('Setujui (ACC)'),
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor:
-                                                      AppTheme.statusGreen,
-                                                  padding: const EdgeInsets
-                                                      .symmetric(vertical: 8),
-                                                  textStyle: GoogleFonts.inter(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                                onPressed: () {
-                                                  setState(() {
-                                                    _authService.approveRegistration(
-                                                        reg.id);
-                                                  });
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                          'Akun ${reg.fullName} berhasil disetujui (ACC)!'),
-                                                      backgroundColor:
-                                                          AppTheme.statusGreen,
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            OutlinedButton(
-                                              style: OutlinedButton.styleFrom(
-                                                foregroundColor:
-                                                    AppTheme.statusRed,
-                                                side: const BorderSide(
-                                                    color: AppTheme.statusRed),
-                                                padding: const EdgeInsets
-                                                    .symmetric(
-                                                    vertical: 8,
-                                                    horizontal: 14),
-                                              ),
-                                              onPressed: () {
-                                                setState(() {
-                                                  _authService.rejectRegistration(
-                                                      reg.id, 'Data tidak lengkap');
-                                                });
-                                              },
-                                              child: const Text('Tolak'),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                );
-                              },
+                                ),
+                              ],
                             ),
-                        ],
-                      ),
-                    ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                ],
-                const SizedBox(height: 24),
-              ],
+                );
+              },
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTableHeader(String title, bool isDark) {
+    return Text(
+      title,
+      style: GoogleFonts.inter(
+        fontSize: 10,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0.6,
+        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(String key, String title, bool isDark) {
+    final isSelected = _filterType == key;
+    return InkWell(
+      onTap: () => setState(() => _filterType = key),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (key == 'PRESENT'
+                  ? const Color(0xFF10B981)
+                  : key == 'LATE'
+                      ? const Color(0xFFF59E0B)
+                      : (isDark ? const Color(0xFF1E293B) : Colors.white))
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: isSelected && key == 'ALL'
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          title,
+          style: GoogleFonts.inter(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: isSelected
+                ? (key == 'ALL' ? (isDark ? Colors.white : const Color(0xFF0F172A)) : Colors.white)
+                : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildMetricCard({
-    required String title,
-    required String count,
-    required String subtitle,
-    required IconData icon,
-    required Color color,
-    required Color bg,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.borderLight),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.inter(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textMuted,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                Icon(icon, size: 16, color: color),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              count,
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: AppTheme.textMain,
-              ),
-            ),
-            Text(
-              subtitle,
-              style: GoogleFonts.inter(
-                fontSize: 9,
-                color: AppTheme.textMuted,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String label) {
-    final isSelected = _selectedFilter == label;
+  Widget _buildApprovalFilterButton(String key, String title, bool isDark) {
+    final isSelected = _approvalFilter == key;
     return InkWell(
-      onTap: () => setState(() => _selectedFilter = label),
-      borderRadius: BorderRadius.circular(10),
+      onTap: () => setState(() => _approvalFilter = key),
+      borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primarySky : AppTheme.softSkyLight,
-          borderRadius: BorderRadius.circular(10),
+          color: isSelected
+              ? (isDark ? const Color(0xFF1E293B) : Colors.white)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                  ),
+                ]
+              : null,
         ),
         child: Text(
-          label,
+          title,
           style: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : AppTheme.primarySky,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: isSelected
+                ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
           ),
         ),
       ),
