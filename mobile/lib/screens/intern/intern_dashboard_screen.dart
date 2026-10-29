@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../config/app_theme.dart';
 import '../../models/attendance_model.dart';
+import '../../models/user_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/attendance_service.dart';
 import '../../services/geofence_service.dart';
@@ -547,7 +548,7 @@ class _InternDashboardScreenState extends State<InternDashboardScreen> {
   }
 
   // HERO TERMINAL CARD (Variant C - Presensi Siswa Magang)
-  Widget _buildHeroTerminalCard(bool isDark, bool isMobile, user) {
+  Widget _buildHeroTerminalCard(bool isDark, bool isMobile, UserModel? user) {
     return Container(
       padding: EdgeInsets.all(isMobile ? 18 : 26),
       decoration: BoxDecoration(
