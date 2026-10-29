@@ -180,45 +180,32 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Corporate Logo Brand
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Image.asset(
-                            'assets/images/logo.webp',
-                            height: 34,
-                            errorBuilder: (_, __, ___) => const Icon(
+                      // Corporate Logo Brand (Matches Web filter: brightness-0)
+                      Image.asset(
+                        'assets/images/logo.webp',
+                        height: 40,
+                        fit: BoxFit.contain,
+                        color: const Color(0xFF0F172A),
+                        colorBlendMode: BlendMode.srcIn,
+                        errorBuilder: (_, __, ___) => Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
                               Icons.factory_rounded,
                               size: 28,
                               color: Color(0xFF0F172A),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'ASIA PLASTIK',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.5,
-                                  color: const Color(0xFF0F172A),
-                                ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'ASIA PLASTIK',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w900,
+                                color: const Color(0xFF0F172A),
                               ),
-                              Text(
-                                'PLASTIC INDUSTRY',
-                                style: GoogleFonts.inter(
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 1.2,
-                                  color: const Color(0xFF64748B),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
 
                       // Mode Terang Pill Button

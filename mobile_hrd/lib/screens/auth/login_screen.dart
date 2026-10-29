@@ -103,6 +103,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Image.asset(
                       'assets/images/logo.webp',
+                      color: AppTheme.primarySky,
+                      colorBlendMode: BlendMode.srcIn,
                       errorBuilder: (context, error, stackTrace) => const Icon(
                         Icons.admin_panel_settings_rounded,
                         size: 38,

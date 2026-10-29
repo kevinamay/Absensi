@@ -96,6 +96,8 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                         child: Image.asset(
                           'assets/images/logo.webp',
+                          color: AppTheme.primarySky,
+                          colorBlendMode: BlendMode.srcIn,
                           errorBuilder: (context, error, stackTrace) => const Icon(
                             Icons.school_rounded,
                             size: 48,
