@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -124,67 +125,86 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: isDark ? const Color(0xFF020617) : const Color(0xFFF8FBFF),
       body: Stack(
         children: [
-          // Background Floating Soft Aurora Blobs
-          Positioned(
-            top: -100,
-            right: -100,
+          // 1. Base Silky-Smooth Pastel Sky Gradient (Matches Web #f8fbff with soft azure tint)
+          Positioned.fill(
             child: Container(
-              width: 380,
-              height: 380,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    isDark
-                        ? const Color(0xFF0369A1).withValues(alpha: 0.22)
-                        : const Color(0xFFBAE6FD).withValues(alpha: 0.6),
-                    isDark
-                        ? const Color(0xFF0891B2).withValues(alpha: 0.12)
-                        : const Color(0xFFA5F3FC).withValues(alpha: 0.3),
-                    Colors.transparent,
-                  ],
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isDark
+                      ? const [
+                          Color(0xFF020617), // slate-950
+                          Color(0xFF0B132B),
+                          Color(0xFF020617),
+                        ]
+                      : const [
+                          Color(0xFFE0F2FE), // Sky-100 (Lembut cerah di pojok kiri atas)
+                          Color(0xFFF0F9FF), // Sky-50
+                          Color(0xFFF8FBFF), // Soft white
+                          Color(0xFFEBF5FF), // Azure tint
+                          Color(0xFFE0F7FA), // Soft cyan tint di kanan bawah
+                        ],
+                  stops: const [0.0, 0.25, 0.55, 0.85, 1.0],
                 ),
               ),
             ),
           ),
-          Positioned(
-            bottom: -120,
-            left: -120,
-            child: Container(
-              width: 460,
-              height: 460,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    isDark
-                        ? const Color(0xFF1E1B4B).withValues(alpha: 0.35)
-                        : const Color(0xFFBFDBFE).withValues(alpha: 0.5),
-                    isDark
-                        ? const Color(0xFF0F172A).withValues(alpha: 0.2)
-                        : const Color(0xFFC7D2FE).withValues(alpha: 0.3),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 150,
-            left: 100,
-            child: Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    isDark
-                        ? const Color(0xFF0E7490).withValues(alpha: 0.12)
-                        : const Color(0xFFE0F2FE).withValues(alpha: 0.45),
-                    Colors.transparent,
-                  ],
-                ),
+
+          // 2. Gaussian-Blurred Organic Floating Aurora Glows (Matches Tailwind blur-3xl with NO grey halos)
+          Positioned.fill(
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 85, sigmaY: 85),
+              child: Stack(
+                children: [
+                  // Top-Right Aurora Cloud (Sky-300 / Cyan-200)
+                  Positioned(
+                    top: -40,
+                    right: -40,
+                    child: Container(
+                      width: 320,
+                      height: 320,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark
+                            ? const Color(0xFF0284C7).withValues(alpha: 0.16)
+                            : const Color(0xFF7DD3FC).withValues(alpha: 0.45),
+                      ),
+                    ),
+                  ),
+
+                  // Bottom-Left Aurora Cloud (Blue-300 / Indigo-200)
+                  Positioned(
+                    bottom: -60,
+                    left: -60,
+                    child: Container(
+                      width: 360,
+                      height: 360,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark
+                            ? const Color(0xFF1E1B4B).withValues(alpha: 0.3)
+                            : const Color(0xFF93C5FD).withValues(alpha: 0.42),
+                      ),
+                    ),
+                  ),
+
+                  // Center-Left Subtle Accent (Cyan-200)
+                  Positioned(
+                    top: 100,
+                    left: 20,
+                    child: Container(
+                      width: 220,
+                      height: 220,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark
+                            ? const Color(0xFF0E7490).withValues(alpha: 0.1)
+                            : const Color(0xFFA5F3FC).withValues(alpha: 0.35),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
