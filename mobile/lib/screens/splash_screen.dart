@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../config/app_theme.dart';
-import '../config/constants.dart';
 import '../services/auth_service.dart';
 import 'auth/login_screen.dart';
 import 'intern/intern_dashboard_screen.dart';
@@ -64,9 +62,25 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = themeModeNotifier.value == ThemeMode.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF020617) : const Color(0xFFF8FBFF),
       body: Container(
-        decoration: AppTheme.softSkyBackground,
+        decoration: isDark
+            ? null
+            : const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFBAE6FD),
+                    Color(0xFFE0F2FE),
+                    Color(0xFFF8FBFF),
+                  ],
+                  stops: [0.0, 0.45, 1.0],
+                ),
+              ),
         child: Center(
           child: AnimatedBuilder(
             animation: _controller,
@@ -78,66 +92,43 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // App Icon
-                      Container(
-                        width: 96,
-                        height: 96,
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppTheme.primarySky.withValues(alpha: 0.2),
-                              blurRadius: 30,
-                              offset: const Offset(0, 10),
+                      // Direct Logo Only (No circular frame, no extra text)
+                      Image.asset(
+                        'assets/images/logo.webp',
+                        width: 220,
+                        fit: BoxFit.contain,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        colorBlendMode: BlendMode.srcIn,
+                        errorBuilder: (context, error, stackTrace) => Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.factory_rounded,
+                              size: 36,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'ASIA PLASTIK',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
                             ),
                           ],
                         ),
-                        child: Image.asset(
-                          'assets/images/logo.webp',
-                          color: AppTheme.primarySky,
-                          colorBlendMode: BlendMode.srcIn,
-                          errorBuilder: (context, error, stackTrace) => const Icon(
-                            Icons.school_rounded,
-                            size: 48,
-                            color: AppTheme.primarySky,
-                          ),
-                        ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 36),
 
-                      // Company Name
-                      Text(
-                        AppConstants.appName,
-                        style: GoogleFonts.inter(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.textMain,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-
-                      // Subtitle
-                      Text(
-                        'Presensi Magang & Praktik Industri',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: AppTheme.textMuted,
-                        ),
-                      ),
-                      const SizedBox(height: 48),
-
-                      // Spinner
-                      const SizedBox(
-                        width: 24,
-                        height: 24,
+                      // Minimalist Spinner
+                      SizedBox(
+                        width: 22,
+                        height: 22,
                         child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
+                          strokeWidth: 2.2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            AppTheme.primarySky,
+                            isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                           ),
                         ),
                       ),
