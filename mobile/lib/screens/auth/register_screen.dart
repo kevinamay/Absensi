@@ -177,7 +177,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Color(0xFFEBF5FF),
                           Color(0xFFE0F7FA),
                         ],
-                  stops: const [0.0, 0.25, 0.55, 0.85, 1.0],
                 ),
               ),
             ),

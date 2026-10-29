@@ -62,21 +62,26 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = themeModeNotifier.value == ThemeMode.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FBFF),
+      backgroundColor: isDark ? const Color(0xFF020617) : const Color(0xFFF8FBFF),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFBAE6FD),
-              Color(0xFFE0F2FE),
-              Color(0xFFF8FBFF),
-            ],
-            stops: [0.0, 0.45, 1.0],
-          ),
-        ),
+        decoration: isDark
+            ? null
+            : const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFFE0F2FE), // Sky-100
+                    Color(0xFFF0F9FF), // Sky-50
+                    Color(0xFFF8FBFF), // Soft white
+                    Color(0xFFEBF5FF), // Azure tint
+                  ],
+                  stops: [0.0, 0.35, 0.7, 1.0],
+                ),
+              ),
         child: Center(
           child: AnimatedBuilder(
             animation: _controller,
@@ -93,23 +98,23 @@ class _SplashScreenState extends State<SplashScreen>
                         'assets/images/logo.webp',
                         width: 220,
                         fit: BoxFit.contain,
-                        color: const Color(0xFF0F172A),
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
                         colorBlendMode: BlendMode.srcIn,
                         errorBuilder: (context, error, stackTrace) => Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
+                          children: [
                             Icon(
                               Icons.factory_rounded,
                               size: 36,
-                              color: Color(0xFF0F172A),
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                             ),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             Text(
                               'ASIA PLASTIK',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w900,
-                                color: Color(0xFF0F172A),
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
                               ),
                             ),
                           ],

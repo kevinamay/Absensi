@@ -145,7 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           Color(0xFFEBF5FF), // Azure tint
                           Color(0xFFE0F7FA), // Soft cyan tint di kanan bawah
                         ],
-                  stops: const [0.0, 0.25, 0.55, 0.85, 1.0],
                 ),
               ),
             ),
