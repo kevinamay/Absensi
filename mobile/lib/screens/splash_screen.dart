@@ -5,7 +5,6 @@ import '../config/constants.dart';
 import '../services/auth_service.dart';
 import 'auth/login_screen.dart';
 import 'intern/intern_dashboard_screen.dart';
-import 'hrd/hrd_dashboard_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -47,15 +46,9 @@ class _SplashScreenState extends State<SplashScreen>
 
     final auth = AuthService();
     if (auth.isAuthenticated) {
-      if (auth.currentUser!.isAdmin) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HrdDashboardScreen()),
-        );
-      } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const InternDashboardScreen()),
-        );
-      }
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const InternDashboardScreen()),
+      );
     } else {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -75,69 +68,82 @@ class _SplashScreenState extends State<SplashScreen>
       body: Container(
         decoration: AppTheme.softSkyBackground,
         child: Center(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: ScaleTransition(
-              scale: _scaleAnimation,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Logo container
-                  Container(
-                    width: 100,
-                    height: 100,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.primarySky.withValues(alpha: 0.18),
-                          blurRadius: 30,
-                          offset: const Offset(0, 10),
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Opacity(
+                opacity: _fadeAnimation.value,
+                child: Transform.scale(
+                  scale: _scaleAnimation.value,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // App Icon
+                      Container(
+                        width: 96,
+                        height: 96,
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.primarySky.withValues(alpha: 0.2),
+                              blurRadius: 30,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: Image.asset(
-                      'assets/images/logo.webp',
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.factory_rounded,
-                        size: 48,
-                        color: AppTheme.primarySky,
+                        child: Image.asset(
+                          'assets/images/logo.webp',
+                          errorBuilder: (context, error, stackTrace) => const Icon(
+                            Icons.school_rounded,
+                            size: 48,
+                            color: AppTheme.primarySky,
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 24),
+
+                      // Company Name
+                      Text(
+                        AppConstants.appName,
+                        style: GoogleFonts.inter(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.textMain,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Subtitle
+                      Text(
+                        'Presensi Magang & Praktik Industri',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: 48),
+
+                      // Spinner
+                      const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.primarySky,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    AppConstants.appName,
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                      color: AppTheme.textMain,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    AppConstants.appSubtitle,
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: AppTheme.textMuted,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primarySky),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),

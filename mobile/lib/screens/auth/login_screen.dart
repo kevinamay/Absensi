@@ -4,7 +4,6 @@ import '../../config/app_theme.dart';
 import '../../config/constants.dart';
 import '../../services/auth_service.dart';
 import '../intern/intern_dashboard_screen.dart';
-import '../hrd/hrd_dashboard_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,24 +16,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController(text: 'bima.satria@mhs.unesa.ac.id');
   final _passwordController = TextEditingController(text: 'magang123');
-  bool _isAdminMode = false;
   bool _obscurePassword = true;
   bool _isLoading = false;
   String? _errorMessage;
-
-  void _switchRole(bool isAdmin) {
-    setState(() {
-      _isAdminMode = isAdmin;
-      _errorMessage = null;
-      if (isAdmin) {
-        _emailController.text = 'kevinamay23@gmail.com';
-        _passwordController.text = 'admin12345';
-      } else {
-        _emailController.text = 'bima.satria@mhs.unesa.ac.id';
-        _passwordController.text = 'magang123';
-      }
-    });
-  }
 
   Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
@@ -42,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (email.isEmpty || password.isEmpty) {
       setState(() {
-        _errorMessage = 'Silakan isi email dan kata sandi Anda.';
+        _errorMessage = 'Silakan isi email dan kata sandi magang Anda.';
       });
       return;
     }
@@ -53,23 +37,17 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final user = await AuthService().login(
+      await AuthService().login(
         email: email,
         password: password,
-        isAdmin: _isAdminMode,
+        isAdmin: false,
       );
 
       if (!mounted) return;
 
-      if (user.isAdmin) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HrdDashboardScreen()),
-        );
-      } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const InternDashboardScreen()),
-        );
-      }
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const InternDashboardScreen()),
+      );
     } catch (e) {
       setState(() {
         _errorMessage = e.toString().replaceAll('Exception: ', '');
@@ -104,8 +82,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   // App Brand Header
                   Container(
-                    width: 72,
-                    height: 72,
+                    width: 76,
+                    height: 76,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -121,8 +99,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Image.asset(
                       'assets/images/logo.webp',
                       errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.factory_rounded,
-                        size: 36,
+                        Icons.school_rounded,
+                        size: 38,
                         color: AppTheme.primarySky,
                       ),
                     ),
@@ -137,107 +115,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    AppConstants.appSubtitle,
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: AppTheme.textMuted,
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-
-                  // Role Segmented Switcher
                   Container(
-                    padding: const EdgeInsets.all(4),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppTheme.borderLight),
+                      color: AppTheme.primarySky.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: () => _switchRole(false),
-                            borderRadius: BorderRadius.circular(12),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              decoration: BoxDecoration(
-                                color: !_isAdminMode
-                                    ? AppTheme.primarySky
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.school_rounded,
-                                    size: 16,
-                                    color: !_isAdminMode
-                                        ? Colors.white
-                                        : AppTheme.textMuted,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Peserta Magang',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: !_isAdminMode
-                                          ? Colors.white
-                                          : AppTheme.textMuted,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: InkWell(
-                            onTap: () => _switchRole(true),
-                            borderRadius: BorderRadius.circular(12),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              decoration: BoxDecoration(
-                                color: _isAdminMode
-                                    ? AppTheme.primarySky
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.admin_panel_settings_rounded,
-                                    size: 16,
-                                    color: _isAdminMode
-                                        ? Colors.white
-                                        : AppTheme.textMuted,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Supervisor / HRD',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: _isAdminMode
-                                          ? Colors.white
-                                          : AppTheme.textMuted,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      'Portal Presensi Peserta Magang',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primarySky,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
 
                   // Login Form Card
                   Card(
@@ -246,23 +139,44 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            _isAdminMode ? 'Masuk Portal HRD' : 'Masuk Presensi Magang',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: AppTheme.textMain,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _isAdminMode
-                                ? 'Akses personalia untuk monitoring dan persetujuan akun magang.'
-                                : 'Masukkan kredensial akun magang Anda untuk verifikasi presensi harian.',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: AppTheme.textMuted,
-                            ),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primarySky.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  Icons.badge_rounded,
+                                  color: AppTheme.primarySky,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Masuk Akun Magang',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppTheme.textMain,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Verifikasi presensi harian peserta',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12,
+                                        color: AppTheme.textMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 20),
 
@@ -302,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           // Email Field
                           Text(
-                            'Email Terdaftar',
+                            'Email Akun Magang',
                             style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -314,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             decoration: const InputDecoration(
-                              hintText: 'nama@email.com',
+                              hintText: 'nama@mhs.kampus.ac.id',
                               prefixIcon: Icon(Icons.email_outlined, size: 20),
                             ),
                           ),
@@ -369,14 +283,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                       ),
                                     )
-                                  : Row(
+                                  : const Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Text(_isAdminMode
-                                            ? 'Masuk Sebagai Supervisor'
-                                            : 'Masuk Presensi'),
-                                        const SizedBox(width: 8),
-                                        const Icon(Icons.arrow_forward_rounded, size: 18),
+                                        Text('Masuk Presensi Magang'),
+                                        SizedBox(width: 8),
+                                        Icon(Icons.arrow_forward_rounded, size: 18),
                                       ],
                                     ),
                             ),
@@ -385,40 +297,38 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
 
                   // Register link for interns
-                  if (!_isAdminMode) ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Belum punya akun magang? ',
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Belum terdaftar sebagai peserta? ',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: AppTheme.textMuted,
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const RegisterScreen(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Daftar Magang Baru',
                           style: GoogleFonts.inter(
                             fontSize: 13,
-                            color: AppTheme.textMuted,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.primarySky,
                           ),
                         ),
-                        InkWell(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const RegisterScreen(),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            'Daftar Sekarang',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppTheme.primarySky,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

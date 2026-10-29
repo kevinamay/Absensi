@@ -1,0 +1,5 @@
+package com.asiaplastik.attendance.cv_asia_plastik_attendance
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()
