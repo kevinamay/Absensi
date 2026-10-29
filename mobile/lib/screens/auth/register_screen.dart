@@ -431,42 +431,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Pill: Sistem Pendaftaran Terbuka & Onboarding
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-          decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF3B82F6).withValues(alpha: 0.2)
-                : const Color(0xFF3B82F6).withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isDark
-                  ? const Color(0xFF3B82F6).withValues(alpha: 0.5)
-                  : const Color(0xFF3B82F6).withValues(alpha: 0.3),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.auto_awesome_rounded,
-                size: 13,
-                color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1D4ED8),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                'Sistem Pendaftaran Terbuka & Onboarding',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1D4ED8),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-
         // H1 Title
         Text(
           'Pendaftaran Akun\nPresensi',
@@ -478,19 +442,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(height: 10),
-
-        // Subtitle
-        Text(
-          'Daftarkan data diri Anda untuk memulai magang industri. Akun Anda akan ditinjau dan disetujui (ACC) secara langsung oleh HRD CV. Asia Plastik.',
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
 
         // Stepper Card
         Container(
@@ -697,14 +649,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             fontWeight: FontWeight.w900,
             color: isDark ? Colors.white : const Color(0xFF0F172A),
             letterSpacing: -0.4,
-          ),
-        ),
-        const SizedBox(height: 3),
-        Text(
-          'Lengkapi informasi pendaftaran Anda secara tepat untuk diproses oleh HRD.',
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
           ),
         ),
         const SizedBox(height: 18),
