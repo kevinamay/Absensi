@@ -13,74 +13,7 @@ class AttendanceService {
   final List<AttendanceRecord> _records = [];
 
   void _initSampleData() {
-    final now = DateTime.now();
-    final todayStr = DateFormat('yyyy-MM-dd').format(now);
-
-    _records.addAll([
-      AttendanceRecord(
-        id: 'att-001',
-        internId: 'usr-intern-01',
-        internName: 'Bima Satria Wicaksana',
-        internStudentId: '21051204012',
-        institution: 'Universitas Negeri Surabaya',
-        division: 'Produksi & Mesin',
-        type: 'CHECK_IN',
-        status: 'PRESENT',
-        mainStatus: 'HADIR',
-        checkInTime: '07:25',
-        checkOutTime: '16:30',
-        formattedDate: todayStr,
-        formattedTime: '07:25:10 WIB',
-        latitude: -7.3352907,
-        longitude: 112.7565049,
-        distanceFromOfficeMeters: 14.5,
-        isWithinGeofence: true,
-        officeName: 'Kantor 2 (CV. Asia Plastik)',
-        createdAt: now.toIso8601String(),
-      ),
-      AttendanceRecord(
-        id: 'att-002',
-        internId: 'usr-intern-02',
-        internName: 'Anisa Rahmawati',
-        internStudentId: '202111005',
-        institution: 'Politeknik Perkapalan Negeri Surabaya',
-        division: 'Quality Control (QC)',
-        type: 'CHECK_IN',
-        status: 'LATE',
-        mainStatus: 'HADIR',
-        checkInTime: '08:24',
-        checkOutTime: '16:30',
-        formattedDate: todayStr,
-        formattedTime: '08:24:32 WIB',
-        latitude: -7.3361184,
-        longitude: 112.7611569,
-        distanceFromOfficeMeters: 28.0,
-        isWithinGeofence: true,
-        officeName: 'Kantor 1 (PT. Asia Plastik)',
-        createdAt: now.toIso8601String(),
-      ),
-      AttendanceRecord(
-        id: 'att-003',
-        internId: 'usr-intern-03',
-        internName: 'Rizky Firmansyah',
-        internStudentId: '190411100088',
-        institution: 'Universitas Trunojoyo Madura',
-        division: 'Maintenance & Utility',
-        type: 'CHECK_IN',
-        status: 'PERMISSION',
-        mainStatus: 'IZIN_DENGAN_KETERANGAN',
-        permissionSubCategory: 'SAKIT',
-        permissionReason: 'Demam tinggi dan istirahat dokter (surat menyusul via WhatsApp supervisor)',
-        formattedDate: todayStr,
-        formattedTime: '07:10:05 WIB',
-        latitude: -7.3352907,
-        longitude: 112.7565049,
-        distanceFromOfficeMeters: 0.0,
-        isWithinGeofence: false,
-        officeName: 'Izin Online',
-        createdAt: now.toIso8601String(),
-      ),
-    ]);
+    // Inisialisasi awal kosong tanpa data dummy
   }
 
   List<AttendanceRecord> getAllRecords() {

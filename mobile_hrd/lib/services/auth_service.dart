@@ -22,34 +22,7 @@ class AuthService extends ChangeNotifier {
   String? get lastGeneratedOtp => _lastGeneratedOtp;
 
   void _initSampleData() {
-    // Initial pending approvals in queue for HRD
-    _pendingRegistrations.addAll([
-      PendingRegistration(
-        id: 'reg-001',
-        email: 'fajar.nugraha@pens.ac.id',
-        fullName: 'Fajar Nugraha Saputra',
-        institution: 'Politeknik Elektronika Negeri Surabaya',
-        status: 'PENDING_APPROVAL',
-        createdAt: '2026-10-27T09:15:00Z',
-      ),
-      PendingRegistration(
-        id: 'reg-002',
-        email: 'dewi.lestari@its.ac.id',
-        fullName: 'Dewi Lestari Ningrum',
-        institution: 'Institut Teknologi Sepuluh Nopember',
-        status: 'PENDING_APPROVAL',
-        createdAt: '2026-10-27T11:40:00Z',
-      ),
-      PendingRegistration(
-        id: 'reg-003',
-        email: 'hendra.kurniawan@upnjatim.ac.id',
-        fullName: 'Hendra Kurniawan',
-        institution: 'UPN Veteran Jawa Timur',
-        status: 'APPROVED',
-        createdAt: '2026-10-26T14:20:00Z',
-        approvedAt: '2026-10-26T15:00:00Z',
-      ),
-    ]);
+    // Inisialisasi awal kosong tanpa data dummy
   }
 
   /// Login either as Intern or Admin HRD
